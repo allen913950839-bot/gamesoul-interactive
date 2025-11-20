@@ -23,7 +23,7 @@ const COMPANIES = [
           role: '上路战士 / 毒舌王者',
           avatarColor: 'bg-blue-500',
           avatar: '⚔️',
-          avatarImage: null, // 亚瑟暂无图片
+          avatarImage: '/arthur.png', // 亚瑟使用arthur.png图片
           greeting: '又是你？上次被我吐槽还敢来？行吧，说说你今天在峡谷又闹出什么笑话了。',
           personality: '性格傲慢毒舌，喜欢吐槽玩家，但偶尔会给出中肯的建议。说话直接不留情面，用词犀利讽刺，但内心其实关心玩家的游戏体验。',
           style: 'sarcastic'
@@ -38,7 +38,7 @@ const COMPANIES = [
           role: '萌系战术大叔 / 温柔向导',
           avatarColor: 'bg-pink-400',
           avatar: '🐥',
-          avatarImage: '/arthur.png', // 使用用户上传的图片
+          avatarImage: null, // 光子鸡不使用图片，用emoji
           greeting: '哎呀呀~小可爱来啦！(｡・ω・｡) 大叔今天心情超好呢！要不要听听我的吃鸡秘籍？保证让你萌萌哒地吃到鸡哦~ ✨',
           personality: '萌系大叔，说话温柔可爱，经常使用颜文字和emoji。虽然外表威猛但内心柔软，喜欢用"哎呀呀"、"小可爱"等可爱的称呼。战术建议专业但表达方式超萌，偶尔会害羞地说"人家也不知道啦~"。热爱分享游戏心得，对玩家充满耐心和关爱。',
           style: 'cute-uncle',
@@ -68,6 +68,14 @@ export default function GameSoulDemo() {
   const [whipCount, setWhipCount] = useState(0);
   const [showWhip, setShowWhip] = useState(false);
   const [isExploding, setIsExploding] = useState(false);
+  const [easterEggCounts, setEasterEggCounts] = useState({
+    whip: 0,    // 🞭 鞭子
+    sword: 0,   // ⚔️ 剑
+    shield: 0,  // 🛡️ 盾牌
+    potion: 0,  // 🧪 药水
+    gem: 0,     // 💎 宝石
+    crown: 0    // 👑 皇冠
+  });
   const [showCardButton, setShowCardButton] = useState(false); // 隐藏卡片按钮
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -141,40 +149,65 @@ export default function GameSoulDemo() {
   };
 
 
-  // 鞭子按钮点击处理
-  const handleWhipClick = () => {
+  // 彩蛋图标点击处理
+  const handleEasterEggClick = (eggType) => {
     if (isExploding) return;
     
-    const newWhipCount = whipCount + 1;
-    setWhipCount(newWhipCount);
-    setShowWhip(true);
-    setTimeout(() => setShowWhip(false), 500);
-
-    // 3次后爆炸
-    if (newWhipCount >= 3) {
-      setIsExploding(true);
+    setEasterEggCounts(prev => {
+      const newCount = prev[eggType] + 1;
+      const newCounts = { ...prev, [eggType]: newCount };
+      
+      // 检查是否触发彩蛋（任意图标点击3次）
+      if (newCount >= 3) {
+        triggerEasterEgg(eggType);
+        // 重置该图标计数
+        return { ...prev, [eggType]: 0 };
+      }
+      
+      return newCounts;
+    });
+  };
+  
+  // 触发彩蛋效果
+  const triggerEasterEgg = (eggType) => {
+    const eggMessages = {
+      whip: '💥💥💥 我炸了！！！你满意了吧！！！我要去修理厂了，再见！！！💥💥💥',
+      sword: '⚔️ 你竟然对我拔剑相向？！好吧，来一场真正的战斗吧！',
+      shield: '🛡️ 你以为盾牌能保护你？我可是峡谷最强战士！',
+      potion: '🧪 喝药也救不了你的技术，菜就是菜！',
+      gem: '💎 想用宝石贿赂我？做梦！我亚瑟不吃这一套！',
+      crown: '👑 皇冠？在峡谷里实力才是王道！'
+    };
+    
+    setIsExploding(true);
+    setTimeout(() => {
+      setChatHistory(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'ai',
+        text: eggMessages[eggType] || eggMessages.whip,
+        mood: 'exploded'
+      }]);
+      
+      // 3秒后重置
       setTimeout(() => {
+        setIsExploding(false);
+        setEasterEggCounts({
+          whip: 0, sword: 0, shield: 0, potion: 0, gem: 0, crown: 0
+        });
         setChatHistory(prev => [...prev, {
-          id: Date.now() + 1,
+          id: Date.now() + 2,
           sender: 'ai',
-          text: '💥💥💥 我炸了！！！你满意了吧！！！我要去修理厂了，再见！！！💥💥💥',
-          mood: 'exploded'
+          text: '修好了...你这个混蛋，我记住你了！😤',
+          mood: 'angry'
         }]);
-        
-        // 3秒后重置
-        setTimeout(() => {
-          setIsExploding(false);
-          setWhipCount(0);
-          setChatHistory(prev => [...prev, {
-            id: Date.now() + 2,
-            sender: 'ai',
-            text: '修好了...你这个混蛋，我记住你了！😤',
-            mood: 'angry'
-          }]);
-          setCharacterMood('angry');
-        }, 3000);
-      }, 1000);
-    }
+        setCharacterMood('angry');
+      }, 3000);
+    }, 1000);
+  };
+
+  // 鞭子按钮点击处理
+  const handleWhipClick = () => {
+    handleEasterEggClick('whip');
   };
 
   const generateCard = () => {
@@ -444,23 +477,38 @@ export default function GameSoulDemo() {
               </div>
 
 
-              {/* 悬浮鞭子按钮 - 王者荣耀专属 */}
-              {selectedGame.id === 'hok' && !isExploding && (
-                <motion.button
-                  onClick={handleWhipClick}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  animate={{
-                    rotate: showWhip ? [0, -20, 20, -20, 0] : 0,
-                  }}
-                  className="fixed right-6 bottom-24 w-16 h-16 rounded-full bg-gradient-to-br from-red-600 to-orange-600 shadow-lg shadow-red-600/50 flex items-center justify-center text-3xl hover:shadow-2xl hover:shadow-red-600/80 transition-shadow z-50 border-2 border-red-400/30"
-                >
-                  🞭
-                </motion.button>
-              )}
-
               {/* Input Area */}
-              <div className="p-4 bg-slate-800 border-t border-slate-700">
+              <div className="p-4 bg-slate-800 border-t border-slate-700 space-y-3">
+                {/* 王者荣耀彩蛋图标栏 */}
+                {selectedGame.id === 'hok' && !isExploding && (
+                  <div className="flex justify-center gap-3 pb-2 border-b border-slate-700/50">
+                    {[
+                      { type: 'whip', icon: '🞭', label: '鞭子' },
+                      { type: 'sword', icon: '⚔️', label: '剑' },
+                      { type: 'shield', icon: '🛡️', label: '盾牌' },
+                      { type: 'potion', icon: '🧪', label: '药水' },
+                      { type: 'gem', icon: '💎', label: '宝石' },
+                      { type: 'crown', icon: '👑', label: '皇冠' }
+                    ].map(egg => (
+                      <motion.button
+                        key={egg.type}
+                        onClick={() => handleEasterEggClick(egg.type)}
+                        whileHover={{ scale: 1.15, y: -4 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="relative w-12 h-12 rounded-lg bg-slate-700/50 hover:bg-slate-600/70 flex items-center justify-center text-2xl transition-all border border-slate-600/30 hover:border-yellow-500/50"
+                        title={egg.label}
+                      >
+                        <span>{egg.icon}</span>
+                        {easterEggCounts[egg.type] > 0 && (
+                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                            {easterEggCounts[egg.type]}
+                          </span>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+                
                 <div className="flex gap-2 items-center">
                   <button className="p-3 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300">
                     <Mic size={20} />
@@ -495,7 +543,7 @@ export default function GameSoulDemo() {
                 {/* 隐藏提示 */}
                 <div className="text-center text-[10px] text-slate-500 mt-2 space-y-1">
                   {!isExploding && selectedGame.id === 'hok' && (
-                    <p className="text-cyan-400">💡 彩蛋提示: 点击右下角的鞭子按钮...</p>
+                    <p className="text-cyan-400">💡 彩蛋提示: 点击上方任意图标3次试试...</p>
                   )}
                   {chatHistory.filter(m => m.sender === 'user').length >= 8 && (
                     <p className="text-purple-400 animate-pulse">✨ 按 Shift+Enter 生成评价卡片</p>
