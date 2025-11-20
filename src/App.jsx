@@ -84,6 +84,7 @@ export default function GameSoulDemo() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isRecording, setIsRecording] = useState(false); // 录音状态
   const [recognition, setRecognition] = useState(null); // 语音识别对象
+  const [featuredConversations, setFeaturedConversations] = useState([]); // 精选对话
   const messagesEndRef = useRef(null);
 
   const handleSelectGame = (game) => {
@@ -145,6 +146,26 @@ export default function GameSoulDemo() {
       console.warn('⚠️ 浏览器不支持语音识别');
     }
   }, []);
+
+  // 加载首页精选对话
+  useEffect(() => {
+    const loadFeaturedConversations = async () => {
+      try {
+        const response = await fetch('/api/get-public-conversations?limit=6&offset=0&sortBy=popular');
+        if (response.ok) {
+          const data = await response.json();
+          setFeaturedConversations(data.conversations || []);
+        }
+      } catch (err) {
+        console.error('加载精选对话失败:', err);
+        setFeaturedConversations([]);
+      }
+    };
+    
+    if (view === 'landing') {
+      loadFeaturedConversations();
+    }
+  }, [view]);
 
   // 开始/停止录音
   const toggleRecording = () => {
@@ -213,7 +234,7 @@ export default function GameSoulDemo() {
   };
 
 
-  // 彩蛋图标点击处理
+  // 彩蛋图标点击处理 - 每次点击都有动效，第三次最强烈
   const handleEasterEggClick = (eggType) => {
     if (isExploding) return;
     
@@ -221,81 +242,129 @@ export default function GameSoulDemo() {
       const newCount = prev[eggType] + 1;
       const newCounts = { ...prev, [eggType]: newCount };
       
-      // 检查是否触发彩蛋（任意图标点击3次）
+      // 每次点击都触发动效
       if (newCount >= 3) {
-        triggerEasterEgg(eggType);
-        // 重置该图标计数
+        // 第三次：最强烈效果
+        triggerEasterEgg(eggType, 'strong');
         return { ...prev, [eggType]: 0 };
+      } else if (newCount === 2) {
+        // 第二次：中等效果
+        triggerEasterEgg(eggType, 'medium');
+      } else {
+        // 第一次：轻微效果
+        triggerEasterEgg(eggType, 'weak');
       }
       
       return newCounts;
     });
   };
   
-  // 触发彩蛋效果
-  const triggerEasterEgg = (eggType) => {
+  // 触发彩蛋效果 - 支持不同强度
+  const triggerEasterEgg = (eggType, intensity = 'weak') => {
     const eggEffects = {
       whip: {
-        message: '💥啪！！！你个混蛋！我的护甲裂了！！！现在我要去铁匠铺修理了，都怪你！💢',
-        recovery: '呼...修好了，下次别这么用力好吗？我还要上场打团呢！😤',
-        mood: 'angry'
+        weak: { message: '💢 哎！轻点！', mood: 'neutral' },
+        medium: { message: '💥 喂喂！别乱敲啊！', mood: 'angry' },
+        strong: { 
+          message: '💥啪！！！你个混蛋！我的护甲裂了！！！现在我要去铁匠铺修理了，都怪你！💢',
+          recovery: '呼...修好了，下次别这么用力好吗？我还要上场打团呢！😤',
+          mood: 'angry'
+        }
       },
       sword: {
-        message: '⚔️ 竟敢向我拔剑？！哈哈哈，来战个痛快！看我圣剑裁决！✨',
-        recovery: '不错的剑术，但还是差了点。要多练啊小子！😏',
-        mood: 'proud'
+        weak: { message: '⚔️ 嗯？想比剑？', mood: 'neutral' },
+        medium: { message: '⚔️ 哈！来切磋切磋！', mood: 'proud' },
+        strong: { 
+          message: '⚔️ 竟敢向我拔剑？！哈哈哈，来战个痛快！看我圣剑裁决！✨',
+          recovery: '不错的剑术，但还是差了点。要多练啊小子！😏',
+          mood: 'proud'
+        }
       },
       shield: {
-        message: '🛡️ 哟？想用盾牌防我？我亚瑟才是峡谷第一坦克！给你看看什么叫真正的防御！',
-        recovery: '盾牌碰撞的感觉还不错，算你有点本事。继续加油！💪',
-        mood: 'neutral'
+        weak: { message: '🛡️ 防御准备...', mood: 'neutral' },
+        medium: { message: '🛡️ 盾牌举起！', mood: 'neutral' },
+        strong: { 
+          message: '🛡️ 哟？想用盾牌防我？我亚瑟才是峡谷第一坦克！给你看看什么叫真正的防御！',
+          recovery: '盾牌碰撞的感觉还不错，算你有点本事。继续加油！💪',
+          mood: 'neutral'
+        }
       },
       potion: {
-        message: '🧪 咕噜咕噜~这药水...什么味道？！呸呸呸！是毒药吧？！你想害死我？！😵',
-        recovery: '好了好了，我没事...不过你这破药水真难喝，下次带点好的来！🤢',
-        mood: 'sad'
+        weak: { message: '🧪 这是什么药？', mood: 'neutral' },
+        medium: { message: '🧪 咕噜...味道怪怪的！', mood: 'sad' },
+        strong: { 
+          message: '🧪 咕噜咕噜~这药水...什么味道？！呸呸呸！是毒药吧？！你想害死我？！😵',
+          recovery: '好了好了，我没事...不过你这破药水真难喝，下次带点好的来！🤢',
+          mood: 'sad'
+        }
       },
       gem: {
-        message: '💎 闪闪发光的宝石？！哼，你以为我会为了这点小钱出卖原则吗？...咳咳，我先收着！😎',
-        recovery: '好吧，宝石确实挺漂亮的，我就勉为其难收下了。你还挺有眼光嘛！✨',
-        mood: 'happy'
+        weak: { message: '💎 嗯？宝石？', mood: 'neutral' },
+        medium: { message: '💎 哦哦！闪闪发光！', mood: 'happy' },
+        strong: { 
+          message: '💎 闪闪发光的宝石？！哼，你以为我会为了这点小钱出卖原则吗？...咳咳，我先收着！😎',
+          recovery: '好吧，宝石确实挺漂亮的，我就勉为其难收下了。你还挺有眼光嘛！✨',
+          mood: 'happy'
+        }
       },
       crown: {
-        message: '👑 皇冠？！这是...王者之证？！我亚瑟配得上这份荣耀！感谢你的认可！🌟',
-        recovery: '戴着皇冠的感觉真不错！看来你也认可我的实力了，哈哈哈！😄',
-        mood: 'happy'
+        weak: { message: '👑 这是...皇冠？', mood: 'neutral' },
+        medium: { message: '👑 王者之证！我配得上！', mood: 'happy' },
+        strong: { 
+          message: '👑 皇冠？！这是...王者之证？！我亚瑟配得上这份荣耀！感谢你的认可！🌟',
+          recovery: '戴着皇冠的感觉真不错！看来你也认可我的实力了，哈哈哈！😄',
+          mood: 'happy'
+        }
       }
     };
     
-    const effect = eggEffects[eggType] || eggEffects.whip;
+    const effect = eggEffects[eggType]?.[intensity] || eggEffects.whip.weak;
     
-    setIsExploding(true);
-    setActiveEasterEgg(eggType); // 设置当前彩蛋类型
+    // 根据强度设置不同的动画时长
+    const isStrongEffect = intensity === 'strong';
     
-    setTimeout(() => {
+    setActiveEasterEgg(eggType + '_' + intensity); // 设置当前彩蛋类型+强度
+    
+    if (isStrongEffect) {
+      // 强效果：完整流程
+      setIsExploding(true);
+      
+      setTimeout(() => {
+        setChatHistory(prev => [...prev, {
+          id: Date.now() + 1,
+          sender: 'ai',
+          text: effect.message,
+          mood: effect.mood
+        }]);
+        
+        // 3秒后恢复
+        setTimeout(() => {
+          setIsExploding(false);
+          setActiveEasterEgg(null);
+          setChatHistory(prev => [...prev, {
+            id: Date.now() + 2,
+            sender: 'ai',
+            text: effect.recovery,
+            mood: effect.mood
+          }]);
+          setCharacterMood(effect.mood);
+        }, 3000);
+      }, 1000);
+    } else {
+      // 轻/中效果：快速反馈
       setChatHistory(prev => [...prev, {
         id: Date.now() + 1,
         sender: 'ai',
         text: effect.message,
         mood: effect.mood
       }]);
+      setCharacterMood(effect.mood);
       
-      // 3秒后恢复
+      // 0.5秒后清除动画
       setTimeout(() => {
-        setIsExploding(false);
         setActiveEasterEgg(null);
-        setEasterEggCounts({
-          whip: 0, sword: 0, shield: 0, potion: 0, gem: 0, crown: 0
-        });
-        setChatHistory(prev => [...prev, {
-          id: Date.now() + 2,
-          sender: 'ai',
-          text: effect.recovery,
-          mood: effect.mood
-        }]);
-        setCharacterMood(effect.mood);
-      }, 3000);
-    }, 1000);
+      }, 500);
+    }
   };
 
   // 鞭子按钮点击处理
@@ -363,6 +432,34 @@ export default function GameSoulDemo() {
     }
   };
 
+  // Remix对话 - 基于已有对话继续聊天
+  const handleRemixConversation = (remixData) => {
+    const { gameName, characterName, chatHistory: existingHistory } = remixData;
+    
+    // 找到对应的游戏
+    const game = COMPANIES.flatMap(c => c.games).find(g => g.name === gameName);
+    if (!game) {
+      alert('未找到对应的游戏');
+      return;
+    }
+    
+    // 设置游戏和对话历史
+    setSelectedGame(game);
+    setChatHistory(existingHistory || []);
+    setView('chat');
+    setCharacterMood('neutral');
+    
+    // 添加提示消息
+    setTimeout(() => {
+      setChatHistory(prev => [...prev, {
+        id: Date.now(),
+        sender: 'ai',
+        text: `欢迎回来！我们继续之前的对话吧~ 😊`,
+        mood: 'happy'
+      }]);
+    }, 500);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-pink-500 selection:text-white overflow-hidden">
       <div className="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl relative border-x border-slate-800">
@@ -422,6 +519,89 @@ export default function GameSoulDemo() {
                   </div>
                 </div>
               ))}
+
+              {/* 精选广场模块 */}
+              <div className="space-y-4 pt-4 border-t border-slate-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-slate-300 font-semibold">
+                    <Globe size={20} className="text-cyan-400" />
+                    <span>精选广场</span>
+                    <span className="text-xs text-slate-500">发现优秀作品</span>
+                  </div>
+                  <button
+                    onClick={() => setView('plaza')}
+                    className="text-cyan-400 text-sm hover:text-cyan-300 flex items-center gap-1"
+                  >
+                    查看全部
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+
+                {/* 精选对话列表 */}
+                {featuredConversations.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {featuredConversations.slice(0, 3).map((conv, idx) => (
+                      <motion.div
+                        key={conv.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.01 }}
+                        onClick={() => {
+                          setView('plaza');
+                        }}
+                        className="bg-slate-800/60 backdrop-blur rounded-xl p-4 border border-slate-700 hover:border-cyan-500/50 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* 游戏图标 */}
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center flex-shrink-0 text-2xl">
+                            🎮
+                          </div>
+                          
+                          {/* 对话信息 */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                              {conv.title || '精彩对话'}
+                            </h4>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {conv.gameName} · {conv.characterName}
+                            </p>
+                            
+                            {/* 数据指标 */}
+                            <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                              <span className="flex items-center gap-1">
+                                <Eye size={12} />
+                                {conv.views || 0}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Heart size={12} className="text-pink-500" />
+                                {conv.likes || 0}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MessageCircle size={12} />
+                                {conv.messageCount || 0}条对话
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 悬停提示 */}
+                        <div className="mt-3 pt-3 border-t border-slate-700/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <p className="text-xs text-cyan-400 flex items-center gap-1">
+                            <Sparkles size={12} />
+                            点击查看完整对话并Remix
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-slate-500">
+                    <Globe size={32} className="mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">暂无精选内容</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 
@@ -445,45 +625,78 @@ export default function GameSoulDemo() {
                 {/* 角色形象 */}
                 <div className="relative z-10 h-full flex flex-col items-center justify-center">
                   <motion.div
-                    animate={{
-                      // 战锤：护甲破裂 - 震动+碎裂效果
-                      scale: activeEasterEgg === 'whip' ? [1, 1.2, 0.9, 1.1, 0] : 
-                             isExploding && !activeEasterEgg ? [1, 1.5, 0] :
-                             characterMood === 'angry' ? [1, 1.1, 1] : 1,
+                    animate={(() => {
+                      const eggType = activeEasterEgg?.split('_')[0];
+                      const intensity = activeEasterEgg?.split('_')[1] || 'weak';
                       
-                      // 圣剑：战斗动作 - 左右闪避+跳跃
-                      x: activeEasterEgg === 'sword' ? [-20, 20, -15, 15, -10, 10, 0] : 0,
-                      y: activeEasterEgg === 'sword' ? [-30, -40, -30, -20, 0] :
-                         characterMood === 'happy' ? [0, -10, 0] : 0,
+                      // 根据强度调整动画幅度
+                      const getScale = (weak, medium, strong) => {
+                        if (intensity === 'weak') return weak;
+                        if (intensity === 'medium') return medium;
+                        return strong;
+                      };
                       
-                      // 盾牌：防御姿态 - 后退缩小
-                      rotate: activeEasterEgg === 'shield' ? 0 :
-                              activeEasterEgg === 'potion' ? [0, -10, 10, -15, 15, 0] : // 药水：中毒摇晃
-                              activeEasterEgg === 'gem' ? [0, 360] : // 宝石：旋转收钱
-                              activeEasterEgg === 'crown' ? 0 : // 皇冠：稳定
-                              isExploding && !activeEasterEgg ? [0, 180, 360] :
-                              characterMood === 'sarcastic' ? [0, -5, 5, 0] : 0,
+                      return {
+                        // 战锤：震动效果
+                        scale: eggType === 'whip' ? 
+                               (intensity === 'weak' ? [1, 1.05, 1] :
+                                intensity === 'medium' ? [1, 1.1, 0.95, 1.05, 1] :
+                                [1, 1.2, 0.9, 1.1, 0]) :
+                               characterMood === 'angry' ? [1, 1.1, 1] : 1,
+                        
+                        // 圣剑：战斗动作
+                        x: eggType === 'sword' ? 
+                           (intensity === 'weak' ? [-5, 5, 0] :
+                            intensity === 'medium' ? [-10, 10, -5, 5, 0] :
+                            [-20, 20, -15, 15, -10, 10, 0]) : 0,
+                        y: eggType === 'sword' ? 
+                           (intensity === 'weak' ? [-5, 0] :
+                            intensity === 'medium' ? [-15, -10, 0] :
+                            [-30, -40, -30, -20, 0]) :
+                           characterMood === 'happy' ? [0, -10, 0] : 0,
+                        
+                        // 盾牌/药水/宝石/皇冠的旋转
+                        rotate: eggType === 'shield' ? 0 :
+                                eggType === 'potion' ? 
+                                (intensity === 'weak' ? [0, -3, 3, 0] :
+                                 intensity === 'medium' ? [0, -7, 7, -5, 5, 0] :
+                                 [0, -10, 10, -15, 15, 0]) :
+                                eggType === 'gem' ? 
+                                (intensity === 'weak' ? [0, 90] :
+                                 intensity === 'medium' ? [0, 180] :
+                                 [0, 360]) :
+                                eggType === 'crown' ? 0 :
+                                characterMood === 'sarcastic' ? [0, -5, 5, 0] : 0,
+                        
+                        // 盾牌：闪烁防御
+                        opacity: eggType === 'shield' ? 
+                                 (intensity === 'weak' ? [1, 0.7, 1] :
+                                  intensity === 'medium' ? [1, 0.5, 1] :
+                                  [1, 0.3, 1]) : 1
+                      };
+                    })()}
+                    transition={(() => {
+                      const eggType = activeEasterEgg?.split('_')[0];
+                      const intensity = activeEasterEgg?.split('_')[1] || 'weak';
                       
-                      // 皇冠：加冕效果 - 上升+光芒
-                      opacity: activeEasterEgg === 'shield' ? [1, 0.3, 1] : // 盾牌：闪烁防御
-                               isExploding ? [1, 1, 0] : 1
-                    }}
-                    transition={{ 
-                      duration: activeEasterEgg === 'whip' ? 1.0 : // 战锤：震动
-                               activeEasterEgg === 'sword' ? 1.2 : // 圣剑：战斗
-                               activeEasterEgg === 'shield' ? 0.8 : // 盾牌：防御
-                               activeEasterEgg === 'potion' ? 1.5 : // 药水：中毒
-                               activeEasterEgg === 'gem' ? 1.0 : // 宝石：旋转
-                               activeEasterEgg === 'crown' ? 1.0 : // 皇冠：加冕
-                               isExploding ? 0.8 : 0.5,
-                      repeat: !isExploding && (characterMood === 'angry' || characterMood === 'happy') ? Infinity : 0,
-                      repeatDelay: 2,
-                      ease: activeEasterEgg === 'whip' ? [0.6, 0.01, 0.05, 0.95] : // 战锤：弹性
-                            activeEasterEgg === 'sword' ? 'easeInOut' : // 圣剑：流畅
-                            activeEasterEgg === 'potion' ? [0.68, -0.55, 0.27, 1.55] : // 药水：醉酒
-                            'easeOut'
-                    }}
-                    className={`mb-4 ${isExploding && activeEasterEgg === 'whip' ? 'opacity-0' : 'opacity-100'}`}
+                      return {
+                        duration: intensity === 'weak' ? 0.3 :
+                                 intensity === 'medium' ? 0.6 :
+                                 eggType === 'whip' ? 1.0 :
+                                 eggType === 'sword' ? 1.2 :
+                                 eggType === 'shield' ? 0.8 :
+                                 eggType === 'potion' ? 1.5 :
+                                 eggType === 'gem' ? 1.0 :
+                                 eggType === 'crown' ? 1.0 : 0.5,
+                        repeat: !isExploding && (characterMood === 'angry' || characterMood === 'happy') ? Infinity : 0,
+                        repeatDelay: 2,
+                        ease: eggType === 'whip' ? [0.6, 0.01, 0.05, 0.95] :
+                              eggType === 'sword' ? 'easeInOut' :
+                              eggType === 'potion' ? [0.68, -0.55, 0.27, 1.55] :
+                              'easeOut'
+                      };
+                    })()}
+                    className={`mb-4`}
                   >
                     {selectedGame.character.avatarImage ? (
                       <img 
@@ -504,7 +717,7 @@ export default function GameSoulDemo() {
                   {/* 各种彩蛋特效 */}
                   <AnimatePresence>
                     {/* 战锤：护甲碎片飞溅 */}
-                    {activeEasterEgg === 'whip' && (
+                    {activeEasterEgg?.startsWith('whip') && (
                       <>
                         <motion.div
                           initial={{ scale: 0, opacity: 1 }}
@@ -535,7 +748,7 @@ export default function GameSoulDemo() {
                     )}
                     
                     {/* 圣剑：剑气特效 */}
-                    {activeEasterEgg === 'sword' && (
+                    {activeEasterEgg?.startsWith('sword') && (
                       <>
                         {[0, 0.2, 0.4].map((delay, i) => (
                           <motion.div
@@ -552,7 +765,7 @@ export default function GameSoulDemo() {
                     )}
                     
                     {/* 盾牌：防御光环 */}
-                    {activeEasterEgg === 'shield' && (
+                    {activeEasterEgg?.startsWith('shield') && (
                       <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ 
@@ -565,7 +778,7 @@ export default function GameSoulDemo() {
                     )}
                     
                     {/* 药水：中毒气泡 */}
-                    {activeEasterEgg === 'potion' && (
+                    {activeEasterEgg?.startsWith('potion') && (
                       <>
                         {[...Array(8)].map((_, i) => (
                           <motion.div
@@ -590,7 +803,7 @@ export default function GameSoulDemo() {
                     )}
                     
                     {/* 宝石：金币飞舞 */}
-                    {activeEasterEgg === 'gem' && (
+                    {activeEasterEgg?.startsWith('gem') && (
                       <>
                         {[...Array(12)].map((_, i) => (
                           <motion.div
@@ -623,7 +836,7 @@ export default function GameSoulDemo() {
                     )}
                     
                     {/* 皇冠：光芒四射 */}
-                    {activeEasterEgg === 'crown' && (
+                    {activeEasterEgg?.startsWith('crown') && (
                       <>
                         <motion.div
                           initial={{ scale: 0, opacity: 0, y: -100 }}
@@ -999,9 +1212,9 @@ export default function GameSoulDemo() {
               key="plaza"
               onBack={() => setView('chat')}
               onSelectConversation={(id) => {
-                // TODO: 加载并显示对话详情
                 console.log('查看对话:', id);
               }}
+              onRemix={handleRemixConversation}
             />
           )}
 
