@@ -155,9 +155,14 @@ export default function GameSoulDemo() {
         if (response.ok) {
           const data = await response.json();
           setFeaturedConversations(data.conversations || []);
+        } else {
+          // API失败时使用空数组，不影响主流程
+          console.warn('精选对话加载失败，使用空状态');
+          setFeaturedConversations([]);
         }
       } catch (err) {
-        console.error('加载精选对话失败:', err);
+        // 网络错误时也使用空数组
+        console.warn('加载精选对话出错:', err.message);
         setFeaturedConversations([]);
       }
     };
@@ -538,11 +543,11 @@ export default function GameSoulDemo() {
                 </div>
 
                 {/* 精选对话列表 */}
-                {featuredConversations.length > 0 ? (
+                {featuredConversations && featuredConversations.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3">
                     {featuredConversations.slice(0, 3).map((conv, idx) => (
                       <motion.div
-                        key={conv.id}
+                        key={conv?.id || `featured-${idx}`}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
@@ -561,25 +566,25 @@ export default function GameSoulDemo() {
                           {/* 对话信息 */}
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-sm line-clamp-1 group-hover:text-cyan-400 transition-colors">
-                              {conv.title || '精彩对话'}
+                              {conv?.title || '精彩对话'}
                             </h4>
                             <p className="text-xs text-slate-400 mt-1">
-                              {conv.gameName} · {conv.characterName}
+                              {conv?.gameName || '游戏'} · {conv?.characterName || '角色'}
                             </p>
                             
                             {/* 数据指标 */}
                             <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                               <span className="flex items-center gap-1">
                                 <Eye size={12} />
-                                {conv.views || 0}
+                                {conv?.views || 0}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Heart size={12} className="text-pink-500" />
-                                {conv.likes || 0}
+                                {conv?.likes || 0}
                               </span>
                               <span className="flex items-center gap-1">
                                 <MessageCircle size={12} />
-                                {conv.messageCount || 0}条对话
+                                {conv?.messageCount || 0}条对话
                               </span>
                             </div>
                           </div>
