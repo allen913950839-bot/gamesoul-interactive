@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 30
+    },
+    "api/deepseek.js": {
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
+}
