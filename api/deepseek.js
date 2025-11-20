@@ -117,21 +117,37 @@ ${conversationContext}
         console.error('  - Status:', apiResponse.status);
         console.error('  - Response:', errorText.substring(0, 500));
         
-        // API错误时返回萌系降级回复
-        const fallbackResponses = [
-          '哎呀呀~ 大叔今天有点累了呢(´；ω；`) 要不要稍后再来找我玩？小可爱~ 💕',
-          '呜~ 大叔遇到点小问题了(｡•́︿•̀｡) 不过还是很想和你聊天呢！继续说吧~ ✨',
-          '讨厌啦~ 人家的脑子转不过来了(*/ω＼*) 但还是会认真听你说的哦~ 💖'
-        ];
+        // 解析错误信息
+        let errorDetail = '';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorDetail = errorJson.error?.message || errorJson.message || '';
+        } catch (e) {
+          errorDetail = errorText;
+        }
         
-        const randomFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        // 特殊处理余额不足错误
+        if (apiResponse.status === 402 || errorDetail.includes('Insufficient Balance')) {
+          console.error('💰 DeepSeek账户余额不足！');
+          console.log('💡 解决方案：');
+          console.log('   1. 访问 https://platform.deepseek.com/');
+          console.log('   2. 充值账户或创建新的API Key获取免费额度');
+          console.log('   3. 更新Vercel环境变量中的DEEPSEEK_API_KEY');
+          
+          // 不再返回降级回复，而是使用前端的智能回复系统
+          return res.status(402).json({ 
+            error: 'Insufficient Balance',
+            message: 'DeepSeek API余额不足，请充值或更换API Key',
+            suggestion: '访问 https://platform.deepseek.com/ 充值',
+            useFrontendFallback: true
+          });
+        }
         
-        return res.status(200).json({ 
-          text: randomFallback,
-          mood: 'neutral',
-          source: 'fallback-api-error',
-          error: `API ${apiResponse.status}`,
-          debug: errorText.substring(0, 200)
+        // 其他API错误也让前端处理
+        return res.status(apiResponse.status).json({ 
+          error: `API Error ${apiResponse.status}`,
+          message: errorDetail.substring(0, 200),
+          useFrontendFallback: true
         });
       }
 

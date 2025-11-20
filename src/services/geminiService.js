@@ -42,11 +42,21 @@ export async function getGeminiResponse(characterName, characterPersonality, cha
       })
     });
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
-    }
-
     const data = await response.json();
+    
+    // 检查是否需要使用前端降级
+    if (!response.ok || data.useFrontendFallback) {
+      console.warn('⚠️ API调用失败，使用智能降级回复');
+      console.log('  - 错误信息:', data.error || data.message);
+      
+      if (data.error === 'Insufficient Balance') {
+        console.error('💰 DeepSeek余额不足！');
+        console.log('💡 请访问 https://platform.deepseek.com/ 充值或更换API Key');
+      }
+      
+      // 使用增强的本地回复系统
+      return getEnhancedMockResponse(characterName, characterPersonality, chatHistory, userMessage);
+    }
     
     console.log('✅ AI 回复成功:', data.text?.substring(0, 50) + '...');
     console.log('📊 数据来源:', data.source);
@@ -58,7 +68,7 @@ export async function getGeminiResponse(characterName, characterPersonality, cha
 
   } catch (error) {
     console.error('❌ API 调用失败:', error);
-    console.log('💡 降级使用模拟回复');
+    console.log('💡 降级使用智能模拟回复');
     
     // 出错时降级使用模拟回复
     return getEnhancedMockResponse(characterName, characterPersonality, chatHistory, userMessage);
