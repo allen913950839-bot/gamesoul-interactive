@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- 可爱的小鸡形象 -->
+  <defs>
+    <radialGradient id="bodyGradient" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- 身体 -->
+  <ellipse cx="100" cy="120" rx="60" ry="70" fill="url(#bodyGradient)" stroke="#FF8C00" stroke-width="3"/>
+  
+  <!-- 头部 -->
+  <circle cx="100" cy="70" r="45" fill="url(#bodyGradient)" stroke="#FF8C00" stroke-width="3"/>
+  
+  <!-- 眼睛 -->
+  <circle cx="85" cy="65" r="8" fill="white"/>
+  <circle cx="115" cy="65" r="8" fill="white"/>
+  <circle cx="87" cy="67" r="5" fill="black"/>
+  <circle cx="117" cy="67" r="5" fill="black"/>
+  
+  <!-- 闪光效果 -->
+  <circle cx="84" cy="63" r="2" fill="white"/>
+  <circle cx="114" cy="63" r="2" fill="white"/>
+  
+  <!-- 嘴巴 (可爱的小嘴) -->
+  <polygon points="100,80 90,90 110,90" fill="#FF6347"/>
+  
+  <!-- 腮红 -->
+  <ellipse cx="70" cy="75" rx="10" ry="7" fill="#FFB6C1" opacity="0.6"/>
+  <ellipse cx="130" cy="75" rx="10" ry="7" fill="#FFB6C1" opacity="0.6"/>
+  
+  <!-- 翅膀 -->
+  <ellipse cx="50" cy="120" rx="25" ry="35" fill="#FFA500" stroke="#FF8C00" stroke-width="2" transform="rotate(-20 50 120)"/>
+  <ellipse cx="150" cy="120" rx="25" ry="35" fill="#FFA500" stroke="#FF8C00" stroke-width="2" transform="rotate(20 150 120)"/>
+  
+  <!-- 脚 -->
+  <line x1="85" y1="180" x2="85" y2="195" stroke="#FF6347" stroke-width="4"/>
+  <line x1="115" y1="180" x2="115" y2="195" stroke="#FF6347" stroke-width="4"/>
+  
+  <!-- 爪子 -->
+  <path d="M 75,195 L 80,200 L 85,195 L 90,200 L 95,195" stroke="#FF6347" stroke-width="2" fill="none"/>
+  <path d="M 105,195 L 110,200 L 115,195 L 120,200 L 125,195" stroke="#FF6347" stroke-width="2" fill="none"/>
+  
+  <!-- 头顶毛发/羽毛 -->
+  <path d="M 95,30 Q 100,20 105,30" fill="#FFA500" stroke="#FF8C00" stroke-width="2"/>
+</svg>
