@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Send, Sparkles, ChevronRight, Star, Share2, X, Mic, Zap, Save, History, Globe, Sword } from 'lucide-react';
+import { MessageCircle, Send, Sparkles, ChevronRight, Star, Share2, X, Mic, Zap, Save, History, Globe, Sword, Eye, Heart } from 'lucide-react';
 import { getGeminiResponse } from './services/geminiService';
 import { saveConversation, copyShareLink, generateShareText } from './services/conversationService';
 import SaveDialog from './components/SaveDialog';
