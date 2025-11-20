@@ -389,10 +389,9 @@ export default function GameSoulDemo() {
             >
               <div>
                 <h1 className="text-2xl font-bold mb-2">选择你的战场</h1>
-                <p className="text-slate-400 text-sm">与游戏英灵对话,生成你的专属评价。</p>
               </div>
 
-              {COMPANIES.map(company => (
+              {COMPANIES.filter(company => company.games.length > 0).map(company => (
                 <div key={company.id} className="space-y-4">
                   <div className="flex items-center gap-2 text-slate-300 font-semibold">
                     <span>{company.logo}</span>
@@ -572,26 +571,78 @@ export default function GameSoulDemo() {
                 {selectedGame.id === 'hok' && !isExploding && (
                   <div className="flex justify-center gap-3 pb-2 border-b border-slate-700/50">
                     {[
-                      { type: 'whip', icon: '🔨', label: '战锤' },
-                      { type: 'sword', icon: '⚔️', label: '圣剑' },
-                      { type: 'shield', icon: '🛡️', label: '盾牌' },
-                      { type: 'potion', icon: '🧪', label: '药水' },
-                      { type: 'gem', icon: '💎', label: '宝石' },
-                      { type: 'crown', icon: '👑', label: '皇冠' }
+                      { 
+                        type: 'whip', 
+                        icon: '🔨', 
+                        label: '战锤',
+                        animation: {
+                          whileHover: { scale: 1.15, rotate: [0, -20, 20, 0], transition: { duration: 0.5 } },
+                          whileTap: { scale: 0.9, rotate: 360 }
+                        }
+                      },
+                      { 
+                        type: 'sword', 
+                        icon: '⚔️', 
+                        label: '圣剑',
+                        animation: {
+                          whileHover: { scale: 1.2, y: -8, rotate: [0, 10, -10, 0], transition: { duration: 0.4 } },
+                          whileTap: { scale: 0.85, rotate: 180 }
+                        }
+                      },
+                      { 
+                        type: 'shield', 
+                        icon: '🛡️', 
+                        label: '盾牌',
+                        animation: {
+                          whileHover: { scale: [1, 1.15, 1.1], transition: { duration: 0.3, repeat: Infinity, repeatType: 'reverse' } },
+                          whileTap: { scale: 0.9, x: [-5, 5, -5, 0] }
+                        }
+                      },
+                      { 
+                        type: 'potion', 
+                        icon: '🧪', 
+                        label: '药水',
+                        animation: {
+                          whileHover: { scale: 1.15, y: [-2, -6, -2], rotate: [0, -15, 15, 0], transition: { duration: 0.6, repeat: Infinity } },
+                          whileTap: { scale: 0.9, rotate: [0, 20, -20, 0] }
+                        }
+                      },
+                      { 
+                        type: 'gem', 
+                        icon: '💎', 
+                        label: '宝石',
+                        animation: {
+                          whileHover: { scale: 1.2, rotate: 360, transition: { duration: 0.8, repeat: Infinity, ease: "linear" } },
+                          whileTap: { scale: 0.85 }
+                        }
+                      },
+                      { 
+                        type: 'crown', 
+                        icon: '👑', 
+                        label: '皇冠',
+                        animation: {
+                          whileHover: { scale: 1.15, y: [-4, -8, -4], rotate: [-5, 5, -5, 0], transition: { duration: 0.5, repeat: Infinity } },
+                          whileTap: { scale: 0.9, y: 5 }
+                        }
+                      }
                     ].map(egg => (
                       <motion.button
                         key={egg.type}
                         onClick={() => handleEasterEggClick(egg.type)}
-                        whileHover={{ scale: 1.15, y: -4 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={egg.animation.whileHover}
+                        whileTap={egg.animation.whileTap}
                         className="relative w-12 h-12 rounded-lg bg-slate-700/50 hover:bg-slate-600/70 flex items-center justify-center text-2xl transition-all border border-slate-600/30 hover:border-yellow-500/50"
                         title={egg.label}
                       >
                         <span>{egg.icon}</span>
                         {easterEggCounts[egg.type] > 0 && (
-                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                          <motion.span 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                          >
                             {easterEggCounts[egg.type]}
-                          </span>
+                          </motion.span>
                         )}
                       </motion.button>
                     ))}
