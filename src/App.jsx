@@ -151,7 +151,7 @@ export default function GameSoulDemo() {
   useEffect(() => {
     const loadFeaturedConversations = async () => {
       try {
-        const response = await fetch('/api/get-public-conversations?limit=6&offset=0&sortBy=popular');
+        const response = await fetch('/api/get-public-conversations?limit=6&offset=0&sort=popular');
         if (response.ok) {
           const data = await response.json();
           setFeaturedConversations(data.conversations || []);
