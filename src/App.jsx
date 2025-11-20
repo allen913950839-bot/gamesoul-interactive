@@ -69,8 +69,8 @@ export default function GameSoulDemo() {
   const [showWhip, setShowWhip] = useState(false);
   const [isExploding, setIsExploding] = useState(false);
   const [easterEggCounts, setEasterEggCounts] = useState({
-    whip: 0,    // 🞭 鞭子
-    sword: 0,   // ⚔️ 剑
+    whip: 0,    // 🔨 战锤
+    sword: 0,   // ⚔️ 圣剑
     shield: 0,  // 🛡️ 盾牌
     potion: 0,  // 🧪 药水
     gem: 0,     // 💎 宝石
@@ -233,25 +233,51 @@ export default function GameSoulDemo() {
   
   // 触发彩蛋效果
   const triggerEasterEgg = (eggType) => {
-    const eggMessages = {
-      whip: '💥💥💥 我炸了！！！你满意了吧！！！我要去修理厂了，再见！！！💥💥💥',
-      sword: '⚔️ 你竟然对我拔剑相向？！好吧，来一场真正的战斗吧！',
-      shield: '🛡️ 你以为盾牌能保护你？我可是峡谷最强战士！',
-      potion: '🧪 喝药也救不了你的技术，菜就是菜！',
-      gem: '💎 想用宝石贿赂我？做梦！我亚瑟不吃这一套！',
-      crown: '👑 皇冠？在峡谷里实力才是王道！'
+    const eggEffects = {
+      whip: {
+        message: '💥啪！！！你个混蛋！我的护甲裂了！！！现在我要去铁匠铺修理了，都怪你！💢',
+        recovery: '呼...修好了，下次别这么用力好吗？我还要上场打团呢！😤',
+        mood: 'angry'
+      },
+      sword: {
+        message: '⚔️ 竟敢向我拔剑？！哈哈哈，来战个痛快！看我圣剑裁决！✨',
+        recovery: '不错的剑术，但还是差了点。要多练啊小子！😏',
+        mood: 'proud'
+      },
+      shield: {
+        message: '🛡️ 哟？想用盾牌防我？我亚瑟才是峡谷第一坦克！给你看看什么叫真正的防御！',
+        recovery: '盾牌碰撞的感觉还不错，算你有点本事。继续加油！💪',
+        mood: 'neutral'
+      },
+      potion: {
+        message: '🧪 咕噜咕噜~这药水...什么味道？！呸呸呸！是毒药吧？！你想害死我？！😵',
+        recovery: '好了好了，我没事...不过你这破药水真难喝，下次带点好的来！🤢',
+        mood: 'sad'
+      },
+      gem: {
+        message: '💎 闪闪发光的宝石？！哼，你以为我会为了这点小钱出卖原则吗？...咳咳，我先收着！😎',
+        recovery: '好吧，宝石确实挺漂亮的，我就勉为其难收下了。你还挺有眼光嘛！✨',
+        mood: 'happy'
+      },
+      crown: {
+        message: '👑 皇冠？！这是...王者之证？！我亚瑟配得上这份荣耀！感谢你的认可！🌟',
+        recovery: '戴着皇冠的感觉真不错！看来你也认可我的实力了，哈哈哈！😄',
+        mood: 'happy'
+      }
     };
+    
+    const effect = eggEffects[eggType] || eggEffects.whip;
     
     setIsExploding(true);
     setTimeout(() => {
       setChatHistory(prev => [...prev, {
         id: Date.now() + 1,
         sender: 'ai',
-        text: eggMessages[eggType] || eggMessages.whip,
-        mood: 'exploded'
+        text: effect.message,
+        mood: effect.mood
       }]);
       
-      // 3秒后重置
+      // 3秒后恢复
       setTimeout(() => {
         setIsExploding(false);
         setEasterEggCounts({
@@ -260,10 +286,10 @@ export default function GameSoulDemo() {
         setChatHistory(prev => [...prev, {
           id: Date.now() + 2,
           sender: 'ai',
-          text: '修好了...你这个混蛋，我记住你了！😤',
-          mood: 'angry'
+          text: effect.recovery,
+          mood: effect.mood
         }]);
-        setCharacterMood('angry');
+        setCharacterMood(effect.mood);
       }, 3000);
     }, 1000);
   };
@@ -546,8 +572,8 @@ export default function GameSoulDemo() {
                 {selectedGame.id === 'hok' && !isExploding && (
                   <div className="flex justify-center gap-3 pb-2 border-b border-slate-700/50">
                     {[
-                      { type: 'whip', icon: '🞭', label: '鞭子' },
-                      { type: 'sword', icon: '⚔️', label: '剑' },
+                      { type: 'whip', icon: '🔨', label: '战锤' },
+                      { type: 'sword', icon: '⚔️', label: '圣剑' },
                       { type: 'shield', icon: '🛡️', label: '盾牌' },
                       { type: 'potion', icon: '🧪', label: '药水' },
                       { type: 'gem', icon: '💎', label: '宝石' },
@@ -690,6 +716,8 @@ export default function GameSoulDemo() {
                        {reviewSummary.mood === 'Happy' ? 'Highly Rec' : 'Needs Fix'}
                     </div>
                   </div>
+
+                  {/* 隐藏点赞功能 */}
 
                 </div>
              </div>
