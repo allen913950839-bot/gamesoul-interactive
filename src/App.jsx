@@ -38,7 +38,7 @@ const COMPANIES = [
           role: '萌系战术大叔 / 温柔向导',
           avatarColor: 'bg-pink-400',
           avatar: '🐥',
-          avatarImage: '/pubg-chicken.svg', // 使用SVG图片
+          avatarImage: '/arthur.png', // 使用用户上传的图片
           greeting: '哎呀呀~小可爱来啦！(｡・ω・｡) 大叔今天心情超好呢！要不要听听我的吃鸡秘籍？保证让你萌萌哒地吃到鸡哦~ ✨',
           personality: '萌系大叔，说话温柔可爱，经常使用颜文字和emoji。虽然外表威猛但内心柔软，喜欢用"哎呀呀"、"小可爱"等可爱的称呼。战术建议专业但表达方式超萌，偶尔会害羞地说"人家也不知道啦~"。热爱分享游戏心得，对玩家充满耐心和关爱。',
           style: 'cute-uncle',

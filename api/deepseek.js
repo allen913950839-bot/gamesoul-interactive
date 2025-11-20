@@ -14,6 +14,11 @@ export default async function handler(req, res) {
     // 获取 DeepSeek API Key
     const API_KEY = process.env.DEEPSEEK_API_KEY;
     
+    console.log('🔍 DeepSeek API 检查:');
+    console.log('  - API Key 存在:', !!API_KEY);
+    console.log('  - API Key 前缀:', API_KEY ? API_KEY.substring(0, 10) + '...' : 'N/A');
+    console.log('  - API Key 长度:', API_KEY ? API_KEY.length : 0);
+    
     if (!API_KEY) {
       console.error('❌ DeepSeek API Key not configured');
       return res.status(200).json({ 
@@ -21,7 +26,7 @@ export default async function handler(req, res) {
         useMock: true,
         text: '哎呀呀~ 大叔的脑子今天有点短路呢(´；ω；`) 请稍后再试试吧，么么哒~',
         mood: 'neutral',
-        source: 'mock'
+        source: 'mock-no-key'
       });
     }
 
@@ -50,11 +55,9 @@ ${conversationContext}
 请以${characterName}的萌系大叔口吻回复:`;
 
     console.log('📤 Calling DeepSeek API...');
-    console.log('🔑 API Key exists:', !!API_KEY);
-    console.log('🔑 API Key prefix:', API_KEY ? API_KEY.substring(0, 7) + '...' : 'N/A');
 
     // 调用 DeepSeek API
-    const response = await fetch(
+    const apiResponse = await fetch(
       'https://api.deepseek.com/v1/chat/completions',
       {
         method: 'POST',
@@ -80,21 +83,23 @@ ${conversationContext}
       }
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ DeepSeek API Error:', response.status, errorText);
+    console.log('📥 DeepSeek API Response Status:', apiResponse.status);
+
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error('❌ DeepSeek API Error:', apiResponse.status, errorText);
       
       return res.status(200).json({ 
-        error: `DeepSeek API error: ${response.status}`,
+        error: `DeepSeek API error: ${apiResponse.status}`,
         details: errorText,
         useMock: true,
         text: '哎呀呀~ 大叔今天有点累了呢(´；ω；`) 要不要稍后再来找我玩？',
         mood: 'neutral',
-        source: 'mock'
+        source: 'mock-api-error'
       });
     }
 
-    const data = await response.json();
+    const data = await apiResponse.json();
     console.log('✅ DeepSeek API Success');
 
     const aiText = data.choices?.[0]?.message?.content || '哎呀呀~ 大叔一时语塞了呢~ (*/ω＼*)';
