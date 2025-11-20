@@ -81,6 +81,8 @@ export default function GameSoulDemo() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [isRecording, setIsRecording] = useState(false); // 录音状态
+  const [recognition, setRecognition] = useState(null); // 语音识别对象
   const messagesEndRef = useRef(null);
 
   const handleSelectGame = (game) => {
@@ -103,6 +105,67 @@ export default function GameSoulDemo() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
+
+  // 初始化语音识别
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = 'zh-CN'; // 中文识别
+      
+      recognitionInstance.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('🎤 识别结果:', transcript);
+        setInputText(transcript);
+        setIsRecording(false);
+      };
+      
+      recognitionInstance.onerror = (event) => {
+        console.error('❌ 语音识别错误:', event.error);
+        setIsRecording(false);
+        if (event.error === 'no-speech') {
+          alert('没有检测到语音，请重试');
+        } else if (event.error === 'not-allowed') {
+          alert('请允许使用麦克风权限');
+        } else {
+          alert('语音识别失败: ' + event.error);
+        }
+      };
+      
+      recognitionInstance.onend = () => {
+        setIsRecording(false);
+      };
+      
+      setRecognition(recognitionInstance);
+    } else {
+      console.warn('⚠️ 浏览器不支持语音识别');
+    }
+  }, []);
+
+  // 开始/停止录音
+  const toggleRecording = () => {
+    if (!recognition) {
+      alert('您的浏览器不支持语音识别功能，建议使用Chrome浏览器');
+      return;
+    }
+    
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        recognition.start();
+        setIsRecording(true);
+        console.log('🎤 开始录音...');
+      } catch (error) {
+        console.error('启动语音识别失败:', error);
+        setIsRecording(false);
+      }
+    }
+  };
 
   // AI Logic with Gemini Integration
   const handleSendMessage = async () => {
@@ -510,9 +573,19 @@ export default function GameSoulDemo() {
                 )}
                 
                 <div className="flex gap-2 items-center">
-                  <button className="p-3 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300">
+                  <motion.button 
+                    onClick={toggleRecording}
+                    disabled={isExploding}
+                    whileTap={{ scale: 0.95 }}
+                    className={`p-3 rounded-full transition-all ${
+                      isRecording 
+                        ? 'bg-red-600 text-white animate-pulse' 
+                        : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    title={isRecording ? '点击停止录音' : '点击开始语音输入'}
+                  >
                     <Mic size={20} />
-                  </button>
+                  </motion.button>
                   <div className="flex-1 bg-slate-700 rounded-full flex items-center px-4 py-1">
                     <input 
                       type="text" 
@@ -542,10 +615,13 @@ export default function GameSoulDemo() {
                 
                 {/* 隐藏提示 */}
                 <div className="text-center text-[10px] text-slate-500 mt-2 space-y-1">
-                  {!isExploding && selectedGame.id === 'hok' && (
+                  {isRecording && (
+                    <p className="text-red-400 animate-pulse">🎤 正在录音中...请说话</p>
+                  )}
+                  {!isExploding && selectedGame.id === 'hok' && !isRecording && (
                     <p className="text-cyan-400">💡 彩蛋提示: 点击上方任意图标3次试试...</p>
                   )}
-                  {chatHistory.filter(m => m.sender === 'user').length >= 8 && (
+                  {chatHistory.filter(m => m.sender === 'user').length >= 8 && !isRecording && (
                     <p className="text-purple-400 animate-pulse">✨ 按 Shift+Enter 生成评价卡片</p>
                   )}
                 </div>

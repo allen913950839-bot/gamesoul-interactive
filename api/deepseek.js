@@ -21,10 +21,20 @@ export default async function handler(req, res) {
     
     if (!API_KEY) {
       console.error('❌ DeepSeek API Key not configured');
+      console.log('💡 请在Vercel环境变量中配置 DEEPSEEK_API_KEY');
+      console.log('💡 或者使用模拟回复模式');
+      
+      // 直接返回萌系回复，不返回useMock标志
+      const mockResponses = [
+        '哎呀呀~ 大叔的脑子今天有点短路呢(´；ω；`) 不过没关系，小可爱有什么想聊的吗？💕',
+        '呜呜~ 人家今天有点迷糊呢(｡•́︿•̀｡) 不过大叔还是会认真听你说话的哦~ ✨',
+        '么么~ 大叔在这里呢！(｡・ω・｡) 虽然有点小问题，但咱们继续聊天吧~ 💖'
+      ];
+      
+      const randomMock = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+      
       return res.status(200).json({ 
-        error: 'DeepSeek API Key not configured',
-        useMock: true,
-        text: '哎呀呀~ 大叔的脑子今天有点短路呢(´；ω；`) 请稍后再试试吧，么么哒~',
+        text: randomMock,
         mood: 'neutral',
         source: 'mock-no-key'
       });
@@ -89,13 +99,20 @@ ${conversationContext}
       const errorText = await apiResponse.text();
       console.error('❌ DeepSeek API Error:', apiResponse.status, errorText);
       
+      // API错误时返回萌系降级回复
+      const fallbackResponses = [
+        '哎呀呀~ 大叔今天有点累了呢(´；ω；`) 要不要稍后再来找我玩？小可爱~ 💕',
+        '呜~ 大叔遇到点小问题了(｡•́︿•̀｡) 不过还是很想和你聊天呢！继续说吧~ ✨',
+        '讨厌啦~ 人家的脑子转不过来了(*/ω＼*) 但还是会认真听你说的哦~ 💖'
+      ];
+      
+      const randomFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+      
       return res.status(200).json({ 
-        error: `DeepSeek API error: ${apiResponse.status}`,
-        details: errorText,
-        useMock: true,
-        text: '哎呀呀~ 大叔今天有点累了呢(´；ω；`) 要不要稍后再来找我玩？',
+        text: randomFallback,
         mood: 'neutral',
-        source: 'mock-api-error'
+        source: 'fallback-api-error',
+        error: `API ${apiResponse.status}`
       });
     }
 

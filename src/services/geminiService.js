@@ -48,13 +48,7 @@ export async function getGeminiResponse(characterName, characterPersonality, cha
 
     const data = await response.json();
     
-    // 如果 API 建议使用模拟回复（API Key 未配置或出错）
-    if (data.useMock) {
-      console.log('⚠️ API 不可用，使用模拟回复');
-      return getEnhancedMockResponse(characterName, characterPersonality, chatHistory, userMessage, modelProvider);
-    }
-    
-    console.log('✅ Gemini AI 回复成功:', data.text);
+    console.log('✅ AI 回复成功:', data.text?.substring(0, 50) + '...');
     console.log('📊 数据来源:', data.source);
     
     return {
