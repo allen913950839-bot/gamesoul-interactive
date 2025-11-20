@@ -68,6 +68,7 @@ export default function GameSoulDemo() {
   const [whipCount, setWhipCount] = useState(0);
   const [showWhip, setShowWhip] = useState(false);
   const [isExploding, setIsExploding] = useState(false);
+  const [activeEasterEgg, setActiveEasterEgg] = useState(null); // 当前触发的彩蛋类型
   const [easterEggCounts, setEasterEggCounts] = useState({
     whip: 0,    // 🔨 战锤
     sword: 0,   // ⚔️ 圣剑
@@ -269,6 +270,8 @@ export default function GameSoulDemo() {
     const effect = eggEffects[eggType] || eggEffects.whip;
     
     setIsExploding(true);
+    setActiveEasterEgg(eggType); // 设置当前彩蛋类型
+    
     setTimeout(() => {
       setChatHistory(prev => [...prev, {
         id: Date.now() + 1,
@@ -280,6 +283,7 @@ export default function GameSoulDemo() {
       // 3秒后恢复
       setTimeout(() => {
         setIsExploding(false);
+        setActiveEasterEgg(null);
         setEasterEggCounts({
           whip: 0, sword: 0, shield: 0, potion: 0, gem: 0, crown: 0
         });
@@ -442,30 +446,219 @@ export default function GameSoulDemo() {
                 <div className="relative z-10 h-full flex flex-col items-center justify-center">
                   <motion.div
                     animate={{
-                      scale: isExploding ? [1, 1.5, 0] : characterMood === 'angry' ? [1, 1.1, 1] : 1,
-                      rotate: isExploding ? [0, 180, 360] : characterMood === 'sarcastic' ? [0, -5, 5, 0] : 0,
-                      y: characterMood === 'happy' ? [0, -10, 0] : 0,
+                      // 战锤：护甲破裂 - 震动+碎裂效果
+                      scale: activeEasterEgg === 'whip' ? [1, 1.2, 0.9, 1.1, 0] : 
+                             isExploding && !activeEasterEgg ? [1, 1.5, 0] :
+                             characterMood === 'angry' ? [1, 1.1, 1] : 1,
+                      
+                      // 圣剑：战斗动作 - 左右闪避+跳跃
+                      x: activeEasterEgg === 'sword' ? [-20, 20, -15, 15, -10, 10, 0] : 0,
+                      y: activeEasterEgg === 'sword' ? [-30, -40, -30, -20, 0] :
+                         characterMood === 'happy' ? [0, -10, 0] : 0,
+                      
+                      // 盾牌：防御姿态 - 后退缩小
+                      rotate: activeEasterEgg === 'shield' ? 0 :
+                              activeEasterEgg === 'potion' ? [0, -10, 10, -15, 15, 0] : // 药水：中毒摇晃
+                              activeEasterEgg === 'gem' ? [0, 360] : // 宝石：旋转收钱
+                              activeEasterEgg === 'crown' ? 0 : // 皇冠：稳定
+                              isExploding && !activeEasterEgg ? [0, 180, 360] :
+                              characterMood === 'sarcastic' ? [0, -5, 5, 0] : 0,
+                      
+                      // 皇冠：加冕效果 - 上升+光芒
+                      opacity: activeEasterEgg === 'shield' ? [1, 0.3, 1] : // 盾牌：闪烁防御
+                               isExploding ? [1, 1, 0] : 1
                     }}
                     transition={{ 
-                      duration: isExploding ? 0.8 : 0.5,
+                      duration: activeEasterEgg === 'whip' ? 1.0 : // 战锤：震动
+                               activeEasterEgg === 'sword' ? 1.2 : // 圣剑：战斗
+                               activeEasterEgg === 'shield' ? 0.8 : // 盾牌：防御
+                               activeEasterEgg === 'potion' ? 1.5 : // 药水：中毒
+                               activeEasterEgg === 'gem' ? 1.0 : // 宝石：旋转
+                               activeEasterEgg === 'crown' ? 1.0 : // 皇冠：加冕
+                               isExploding ? 0.8 : 0.5,
                       repeat: !isExploding && (characterMood === 'angry' || characterMood === 'happy') ? Infinity : 0,
-                      repeatDelay: 2
+                      repeatDelay: 2,
+                      ease: activeEasterEgg === 'whip' ? [0.6, 0.01, 0.05, 0.95] : // 战锤：弹性
+                            activeEasterEgg === 'sword' ? 'easeInOut' : // 圣剑：流畅
+                            activeEasterEgg === 'potion' ? [0.68, -0.55, 0.27, 1.55] : // 药水：醉酒
+                            'easeOut'
                     }}
-                    className={`mb-4 ${isExploding ? 'opacity-0' : 'opacity-100'}`}
+                    className={`mb-4 ${isExploding && activeEasterEgg === 'whip' ? 'opacity-0' : 'opacity-100'}`}
                   >
                     {selectedGame.character.avatarImage ? (
                       <img 
                         src={selectedGame.character.avatarImage} 
                         alt={selectedGame.character.name}
-                        className="w-40 h-40 rounded-full object-cover border-4 border-yellow-500/30 shadow-2xl"
+                        className={`w-40 h-40 rounded-full object-cover border-4 shadow-2xl ${
+                          activeEasterEgg === 'crown' ? 'border-yellow-400 shadow-yellow-500/50' :
+                          activeEasterEgg === 'gem' ? 'border-pink-400 shadow-pink-500/50' :
+                          activeEasterEgg === 'shield' ? 'border-blue-500 shadow-blue-500/50' :
+                          'border-yellow-500/30'
+                        }`}
                       />
                     ) : (
                       <span className="text-8xl">{selectedGame.character.avatar || '⚔️'}</span>
                     )}
                   </motion.div>
 
-                  {/* 爆炸效果 */}
-                  {isExploding && (
+                  {/* 各种彩蛋特效 */}
+                  <AnimatePresence>
+                    {/* 战锤：护甲碎片飞溅 */}
+                    {activeEasterEgg === 'whip' && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 1 }}
+                          animate={{ scale: 3, opacity: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="absolute text-8xl"
+                        >
+                          💥
+                        </motion.div>
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 1, x: 0, y: 0, opacity: 1 }}
+                            animate={{ 
+                              scale: [1, 0.5, 0],
+                              x: [0, (Math.cos(i * 60 * Math.PI / 180) * 100)],
+                              y: [0, (Math.sin(i * 60 * Math.PI / 180) * 100)],
+                              opacity: [1, 0.5, 0],
+                              rotate: [0, 360]
+                            }}
+                            transition={{ duration: 1, ease: 'easeOut' }}
+                            className="absolute text-3xl"
+                          >
+                            💢
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 圣剑：剑气特效 */}
+                    {activeEasterEgg === 'sword' && (
+                      <>
+                        {[0, 0.2, 0.4].map((delay, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ x: -100, opacity: 0, scale: 0.5 }}
+                            animate={{ x: 100, opacity: [0, 1, 0], scale: [0.5, 1.5, 0.5] }}
+                            transition={{ duration: 0.6, delay }}
+                            className="absolute text-6xl"
+                          >
+                            ⚔️
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 盾牌：防御光环 */}
+                    {activeEasterEgg === 'shield' && (
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ 
+                          scale: [0.8, 1.5, 1.8],
+                          opacity: [0, 0.8, 0]
+                        }}
+                        transition={{ duration: 0.8, repeat: 3 }}
+                        className="absolute w-60 h-60 rounded-full border-4 border-blue-400"
+                      />
+                    )}
+                    
+                    {/* 药水：中毒气泡 */}
+                    {activeEasterEgg === 'potion' && (
+                      <>
+                        {[...Array(8)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ y: 50, x: (i - 4) * 15, opacity: 0.8, scale: 0.5 }}
+                            animate={{ 
+                              y: [-50, -100, -150],
+                              opacity: [0.8, 0.6, 0],
+                              scale: [0.5, 1, 1.5]
+                            }}
+                            transition={{ 
+                              duration: 1.5, 
+                              delay: i * 0.1,
+                              repeat: 1
+                            }}
+                            className="absolute text-4xl"
+                          >
+                            🟢
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 宝石：金币飞舞 */}
+                    {activeEasterEgg === 'gem' && (
+                      <>
+                        {[...Array(12)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ 
+                              scale: 0, 
+                              x: 0, 
+                              y: 0, 
+                              opacity: 1,
+                              rotate: 0
+                            }}
+                            animate={{ 
+                              scale: [0, 1.5, 0],
+                              x: [(i % 3 - 1) * 60],
+                              y: [0, -40 - Math.floor(i / 3) * 30, -80],
+                              opacity: [0, 1, 0],
+                              rotate: [0, 360 * (i % 2 ? 1 : -1)]
+                            }}
+                            transition={{ 
+                              duration: 1, 
+                              delay: i * 0.08,
+                              ease: 'easeOut'
+                            }}
+                            className="absolute text-4xl"
+                          >
+                            💎
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 皇冠：光芒四射 */}
+                    {activeEasterEgg === 'crown' && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0, y: -100 }}
+                          animate={{ 
+                            scale: [0, 1.2, 1],
+                            opacity: [0, 1, 1],
+                            y: [-100, -200, -180]
+                          }}
+                          transition={{ duration: 1 }}
+                          className="absolute text-8xl"
+                        >
+                          👑
+                        </motion.div>
+                        {[...Array(8)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0, opacity: 1 }}
+                            animate={{ 
+                              scale: [0, 2, 0],
+                              opacity: [1, 0.6, 0],
+                              x: [0, Math.cos(i * 45 * Math.PI / 180) * 150],
+                              y: [0, Math.sin(i * 45 * Math.PI / 180) * 150]
+                            }}
+                            transition={{ duration: 1, delay: i * 0.05 }}
+                            className="absolute text-4xl"
+                          >
+                            ✨
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                  </AnimatePresence>
+
+                  {/* 原有的爆炸效果（通用） */}
+                  {isExploding && !activeEasterEgg && (
                     <motion.div
                       initial={{ scale: 0, opacity: 1 }}
                       animate={{ scale: 3, opacity: 0 }}
