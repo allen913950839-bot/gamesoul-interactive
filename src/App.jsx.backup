@@ -106,7 +106,41 @@ export default function GameSoulDemo() {
     setInputText('');
     setIsTyping(true);
 
-    // 移除了"抽"的文本检测
+    // 检测"抽"彩蛋
+    if (currentInput.includes('抽')) {
+      const newWhipCount = whipCount + 1;
+      setWhipCount(newWhipCount);
+      setShowWhip(true);
+      setTimeout(() => setShowWhip(false), 500);
+
+      // 10次后爆炸
+      if (newWhipCount >= 10) {
+        setIsExploding(true);
+        setTimeout(() => {
+          setChatHistory(prev => [...prev, {
+            id: Date.now() + 1,
+            sender: 'ai',
+            text: '💥💥💥 我炸了！！！你满意了吧！！！我要去修理厂了，再见！！！💥💥💥',
+            mood: 'exploded'
+          }]);
+          setIsTyping(false);
+          
+          // 3秒后重置
+          setTimeout(() => {
+            setIsExploding(false);
+            setWhipCount(0);
+            setChatHistory(prev => [...prev, {
+              id: Date.now() + 2,
+              sender: 'ai',
+              text: '修好了...你这个混蛋，我记住你了！😤',
+              mood: 'angry'
+            }]);
+            setCharacterMood('angry');
+          }, 3000);
+        }, 1000);
+        return;
+      }
+    }
 
     try {
       // 调用 AI API（根据角色选择不同的模型）
@@ -137,43 +171,6 @@ export default function GameSoulDemo() {
         mood: 'neutral'
       }]);
       setIsTyping(false);
-    }
-  };
-
-
-  // 鞭子按钮点击处理
-  const handleWhipClick = () => {
-    if (isExploding) return;
-    
-    const newWhipCount = whipCount + 1;
-    setWhipCount(newWhipCount);
-    setShowWhip(true);
-    setTimeout(() => setShowWhip(false), 500);
-
-    // 3次后爆炸
-    if (newWhipCount >= 3) {
-      setIsExploding(true);
-      setTimeout(() => {
-        setChatHistory(prev => [...prev, {
-          id: Date.now() + 1,
-          sender: 'ai',
-          text: '💥💥💥 我炸了！！！你满意了吧！！！我要去修理厂了，再见！！！💥💥💥',
-          mood: 'exploded'
-        }]);
-        
-        // 3秒后重置
-        setTimeout(() => {
-          setIsExploding(false);
-          setWhipCount(0);
-          setChatHistory(prev => [...prev, {
-            id: Date.now() + 2,
-            sender: 'ai',
-            text: '修好了...你这个混蛋，我记住你了！😤',
-            mood: 'angry'
-          }]);
-          setCharacterMood('angry');
-        }, 3000);
-      }, 1000);
     }
   };
 
@@ -381,9 +378,9 @@ export default function GameSoulDemo() {
                       {characterMood === 'neutral' && '😐 ' + selectedGame.character.role}
                       {characterMood === 'exploded' && '💥 已爆炸'}
                     </p>
-                    {whipCount > 0 && whipCount < 3 && (
+                    {whipCount > 0 && whipCount < 10 && (
                       <p className="text-xs text-red-400 mt-1">
-                        ⚠️ 被抽了 {whipCount} 次 ({3 - whipCount} 次后爆炸)
+                        ⚠️ 被抽了 {whipCount} 次 ({10 - whipCount} 次后爆炸)
                       </p>
                     )}
                     
@@ -443,22 +440,6 @@ export default function GameSoulDemo() {
                 <div ref={messagesEndRef} />
               </div>
 
-
-              {/* 悬浮鞭子按钮 - 王者荣耀专属 */}
-              {selectedGame.id === 'hok' && !isExploding && (
-                <motion.button
-                  onClick={handleWhipClick}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  animate={{
-                    rotate: showWhip ? [0, -20, 20, -20, 0] : 0,
-                  }}
-                  className="fixed right-6 bottom-24 w-16 h-16 rounded-full bg-gradient-to-br from-red-600 to-orange-600 shadow-lg shadow-red-600/50 flex items-center justify-center text-3xl hover:shadow-2xl hover:shadow-red-600/80 transition-shadow z-50 border-2 border-red-400/30"
-                >
-                  🞭
-                </motion.button>
-              )}
-
               {/* Input Area */}
               <div className="p-4 bg-slate-800 border-t border-slate-700">
                 <div className="flex gap-2 items-center">
@@ -494,8 +475,8 @@ export default function GameSoulDemo() {
                 
                 {/* 隐藏提示 */}
                 <div className="text-center text-[10px] text-slate-500 mt-2 space-y-1">
-                  {!isExploding && selectedGame.id === 'hok' && (
-                    <p className="text-cyan-400">💡 彩蛋提示: 点击右下角的鞭子按钮...</p>
+                  {!isExploding && (
+                    <p className="text-cyan-400">💡 彩蛋提示: 试试输入"抽"...</p>
                   )}
                   {chatHistory.filter(m => m.sender === 'user').length >= 8 && (
                     <p className="text-purple-400 animate-pulse">✨ 按 Shift+Enter 生成评价卡片</p>
