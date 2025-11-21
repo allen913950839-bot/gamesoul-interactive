@@ -18,12 +18,13 @@ const COMPANIES = [
         id: 'hok',
         name: '王者荣耀',
         coverColor: 'from-blue-600 to-cyan-800', // 亚瑟的蓝色主题
+        cardIcon: '⚔️', // 首页卡片显示的图标（剑）
         character: {
           name: '亚瑟',
           role: '上路战士 / 毒舌王者',
           avatarColor: 'bg-blue-500',
           avatar: '⚔️',
-          avatarImage: '/arthur.png', // 亚瑟使用arthur.png图片
+          avatarImage: '/arthur.png', // 聊天页虚拟形象使用真实图片
           greeting: '又是你？上次被我吐槽还敢来？行吧，说说你今天在峡谷又闹出什么笑话了。',
           personality: '性格傲慢毒舌，喜欢吐槽玩家，但偶尔会给出中肯的建议。说话直接不留情面，用词犀利讽刺，但内心其实关心玩家的游戏体验。',
           style: 'sarcastic'
@@ -33,12 +34,13 @@ const COMPANIES = [
         id: 'pubg',
         name: '和平精英',
         coverColor: 'from-slate-700 to-slate-900',
+        cardIcon: '🐥', // 首页卡片显示的图标（光子鸡emoji）
         character: {
           name: '光子鸡',
           role: '萌系战术大叔 / 温柔向导',
           avatarColor: 'bg-pink-400',
           avatar: '🐥',
-          avatarImage: null, // 光子鸡不使用图片，用emoji
+          avatarImage: null, // 聊天页虚拟形象也使用emoji（不用图片）
           greeting: '哎呀呀~小可爱来啦！(｡・ω・｡) 大叔今天心情超好呢！要不要听听我的吃鸡秘籍？保证让你萌萌哒地吃到鸡哦~ ✨',
           personality: '萌系大叔，说话温柔可爱，经常使用颜文字和emoji。虽然外表威猛但内心柔软，喜欢用"哎呀呀"、"小可爱"等可爱的称呼。战术建议专业但表达方式超萌，偶尔会害羞地说"人家也不知道啦~"。热爱分享游戏心得，对玩家充满耐心和关爱。',
           style: 'cute-uncle',
@@ -626,17 +628,9 @@ export default function GameSoulDemo() {
                          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
                          
                          {/* 角色图标/剪影 */}
-                         {game.character.avatarImage ? (
-                           <div className="absolute right-2 top-2 w-24 h-24 opacity-30 group-hover:opacity-50 transition-opacity">
-                             <img 
-                               src={game.character.avatarImage} 
-                               alt={game.character.name}
-                               className="w-full h-full object-contain drop-shadow-2xl"
-                             />
-                           </div>
-                         ) : (
+                         {game.cardIcon && (
                            <div className="absolute right-2 top-2 text-6xl opacity-30 group-hover:opacity-50 transition-opacity filter drop-shadow-lg">
-                             {game.character.avatar}
+                             {game.cardIcon}
                            </div>
                          )}
                          
