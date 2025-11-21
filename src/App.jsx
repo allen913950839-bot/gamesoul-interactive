@@ -23,7 +23,7 @@ const COMPANIES = [
           role: '上路战士 / 毒舌王者',
           avatarColor: 'bg-blue-500',
           avatar: '⚔️',
-          avatarImage: null, // 亚瑟不使用图片，用⚔️emoji
+          avatarImage: '/arthur.png', // 亚瑟使用arthur.png图片
           greeting: '又是你？上次被我吐槽还敢来？行吧，说说你今天在峡谷又闹出什么笑话了。',
           personality: '性格傲慢毒舌，喜欢吐槽玩家，但偶尔会给出中肯的建议。说话直接不留情面，用词犀利讽刺，但内心其实关心玩家的游戏体验。',
           style: 'sarcastic'
