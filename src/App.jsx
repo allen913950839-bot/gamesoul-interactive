@@ -466,8 +466,14 @@ export default function GameSoulDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-pink-500 selection:text-white overflow-hidden">
-      <div className="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl relative border-x border-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 text-slate-100 font-sans selection:bg-pink-500 selection:text-white overflow-hidden relative">
+      {/* 背景装饰 - 动态光效 */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+      </div>
+      
+      <div className="max-w-md mx-auto min-h-screen bg-slate-900/80 backdrop-blur-sm shadow-2xl relative border-x border-slate-800">
         
         {/* Header */}
         <header className="p-4 flex items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur z-10 sticky top-0">
@@ -491,34 +497,101 @@ export default function GameSoulDemo() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="p-6 space-y-8"
+              className="relative"
             >
-              <div>
-                <h1 className="text-2xl font-bold mb-2">选择你的战场</h1>
+              {/* Hero区域 - 添加角色背景 */}
+              <div className="relative h-64 overflow-hidden">
+                {/* 渐变背景 */}
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-slate-900/60 to-slate-900"></div>
+                
+                {/* 角色剪影背景 */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                  <div className="relative w-full h-full">
+                    {/* 亚瑟剪影 - 左侧 */}
+                    <div className="absolute left-0 bottom-0 w-40 h-48 bg-gradient-to-t from-blue-600/40 to-transparent transform -skew-x-6">
+                      <Sword className="absolute top-8 left-1/2 -translate-x-1/2 w-16 h-16 text-blue-400/60" />
+                    </div>
+                    {/* 光子鸡剪影 - 右侧 */}
+                    <div className="absolute right-0 bottom-0 w-40 h-48 bg-gradient-to-t from-pink-600/40 to-transparent transform skew-x-6">
+                      <div className="absolute top-8 left-1/2 -translate-x-1/2 text-5xl">🐥</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 标题区域 */}
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-cyan-300 to-pink-400 bg-clip-text text-transparent">
+                      选择你的战场
+                    </h1>
+                    <p className="text-sm text-slate-400 flex items-center justify-center gap-2">
+                      <Sparkles size={14} className="text-cyan-400" />
+                      与游戏角色开启沉浸式对话
+                      <Sparkles size={14} className="text-pink-400" />
+                    </p>
+                  </motion.div>
+                </div>
+                
+                {/* 底部渐变遮罩 */}
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-900 to-transparent"></div>
               </div>
 
-              {COMPANIES.filter(company => company.games.length > 0).map(company => (
-                <div key={company.id} className="space-y-4">
+              {/* 游戏选择区域 */}
+              <div className="p-6 space-y-8 -mt-8">
+                {COMPANIES.filter(company => company.games.length > 0).map(company => (
+                  <div key={company.id} className="space-y-4">
                   <div className="flex items-center gap-2 text-slate-300 font-semibold">
-                    <span>{company.logo}</span>
+                    <span className="text-2xl">{company.logo}</span>
                     <span>{company.name}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     {company.games.map(game => (
                       <motion.div
                         key={game.id}
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.03, y: -4 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleSelectGame(game)}
-                        className={`cursor-pointer h-40 rounded-xl bg-gradient-to-br ${game.coverColor} p-4 flex flex-col justify-end relative overflow-hidden group`}
+                        className={`cursor-pointer h-44 rounded-2xl bg-gradient-to-br ${game.coverColor} p-4 flex flex-col justify-end relative overflow-hidden group shadow-lg hover:shadow-2xl transition-all`}
                       >
-                         <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                         <h3 className="font-bold text-lg relative z-10">{game.name}</h3>
-                         <div className="flex items-center gap-1 text-xs text-white/80 relative z-10">
-                            <MessageCircle size={12} />
-                            <span>召唤{game.character.name}</span>
+                         {/* 背景纹理 */}
+                         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                         <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                         
+                         {/* 角色图标/剪影 */}
+                         {game.character.avatarImage ? (
+                           <div className="absolute right-2 top-2 w-24 h-24 opacity-30 group-hover:opacity-50 transition-opacity">
+                             <img 
+                               src={game.character.avatarImage} 
+                               alt={game.character.name}
+                               className="w-full h-full object-contain drop-shadow-2xl"
+                             />
+                           </div>
+                         ) : (
+                           <div className="absolute right-2 top-2 text-6xl opacity-30 group-hover:opacity-50 transition-opacity filter drop-shadow-lg">
+                             {game.character.avatar}
+                           </div>
+                         )}
+                         
+                         {/* 装饰元素 */}
+                         <div className="absolute -right-2 -top-2 text-4xl opacity-20 rotate-12 group-hover:rotate-0 transition-transform">
+                           <Sparkles className="text-yellow-300" />
                          </div>
-                         <div className="absolute -right-4 -top-4 text-6xl opacity-20 rotate-12">🎮</div>
+                         
+                         {/* 游戏信息 */}
+                         <div className="relative z-10 space-y-1">
+                           <h3 className="font-bold text-lg drop-shadow-lg">{game.name}</h3>
+                           <div className="flex items-center gap-1.5 text-xs text-white/90 bg-black/30 backdrop-blur-sm rounded-full px-2.5 py-1 w-fit">
+                              <MessageCircle size={12} />
+                              <span>召唤{game.character.name}</span>
+                           </div>
+                         </div>
+                         
+                         {/* 悬停光效 */}
+                         <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </motion.div>
                     ))}
                   </div>
@@ -526,19 +599,19 @@ export default function GameSoulDemo() {
               ))}
 
               {/* 精选广场模块 */}
-              <div className="space-y-4 pt-4 border-t border-slate-700">
+              <div className="space-y-4 pt-4 border-t border-slate-700/50 bg-gradient-to-b from-slate-900/50 to-slate-900 rounded-2xl p-4 -mx-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-slate-300 font-semibold">
-                    <Globe size={20} className="text-cyan-400" />
-                    <span>精选广场</span>
-                    <span className="text-xs text-slate-500">发现优秀作品</span>
+                  <div className="flex items-center gap-2 text-slate-200 font-semibold">
+                    <Globe size={20} className="text-cyan-400 animate-pulse" />
+                    <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">精选广场</span>
+                    <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">发现优秀作品</span>
                   </div>
                   <button
                     onClick={() => setView('plaza')}
-                    className="text-cyan-400 text-sm hover:text-cyan-300 flex items-center gap-1"
+                    className="text-cyan-400 text-sm hover:text-cyan-300 flex items-center gap-1 hover:gap-2 transition-all group"
                   >
                     查看全部
-                    <ChevronRight size={16} />
+                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
 
@@ -551,15 +624,15 @@ export default function GameSoulDemo() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        whileHover={{ scale: 1.01 }}
+                        whileHover={{ scale: 1.02, y: -2 }}
                         onClick={() => {
                           setView('plaza');
                         }}
-                        className="bg-slate-800/60 backdrop-blur rounded-xl p-4 border border-slate-700 hover:border-cyan-500/50 transition-all cursor-pointer group"
+                        className="bg-gradient-to-br from-slate-800/80 to-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/50 hover:border-cyan-500/50 transition-all cursor-pointer group shadow-lg hover:shadow-cyan-500/10"
                       >
                         <div className="flex items-start gap-3">
                           {/* 游戏图标 */}
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center flex-shrink-0 text-2xl">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center flex-shrink-0 text-2xl shadow-lg group-hover:scale-110 transition-transform">
                             🎮
                           </div>
                           
@@ -574,17 +647,17 @@ export default function GameSoulDemo() {
                             
                             {/* 数据指标 */}
                             <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
                                 <Eye size={12} />
                                 {conv?.views || 0}
                               </span>
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1 hover:text-pink-400 transition-colors">
                                 <Heart size={12} className="text-pink-500" />
                                 {conv?.likes || 0}
                               </span>
                               <span className="flex items-center gap-1">
                                 <MessageCircle size={12} />
-                                {conv?.messageCount || 0}条对话
+                                {conv?.messageCount || 0}条
                               </span>
                             </div>
                           </div>
@@ -602,11 +675,13 @@ export default function GameSoulDemo() {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-slate-500">
-                    <Globe size={32} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">暂无精选内容</p>
+                    <Globe size={40} className="mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">暂无精选对话</p>
+                    <p className="text-xs mt-1">快去创作第一个精彩对话吧！</p>
                   </div>
                 )}
               </div>
+            </div>
             </motion.div>
           )}
 
