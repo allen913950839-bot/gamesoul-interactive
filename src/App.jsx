@@ -70,12 +70,20 @@ export default function GameSoulDemo() {
   const [isExploding, setIsExploding] = useState(false);
   const [activeEasterEgg, setActiveEasterEgg] = useState(null); // 当前触发的彩蛋类型
   const [easterEggCounts, setEasterEggCounts] = useState({
+    // 王者荣耀彩蛋
     whip: 0,    // 🔨 战锤
     sword: 0,   // ⚔️ 圣剑
     shield: 0,  // 🛡️ 盾牌
     potion: 0,  // 🧪 药水
     gem: 0,     // 💎 宝石
-    crown: 0    // 👑 皇冠
+    crown: 0,   // 👑 皇冠
+    // 和平精英彩蛋
+    airdrop: 0,  // 📦 空投
+    grenade: 0,  // 💣 手雷
+    medkit: 0,   // 🩹 医疗包
+    helmet: 0,   // 🪖 头盔
+    chicken: 0,  // 🍗 吃鸡
+    trophy: 0    // 🏆 奖杯
   });
   const [showCardButton, setShowCardButton] = useState(false); // 隐藏卡片按钮
   const [isSaving, setIsSaving] = useState(false);
@@ -267,6 +275,7 @@ export default function GameSoulDemo() {
   // 触发彩蛋效果 - 支持不同强度
   const triggerEasterEgg = (eggType, intensity = 'weak') => {
     const eggEffects = {
+      // 王者荣耀彩蛋
       whip: {
         weak: { message: '💢 哎！轻点！', mood: 'neutral' },
         medium: { message: '💥 喂喂！别乱敲啊！', mood: 'angry' },
@@ -320,10 +329,65 @@ export default function GameSoulDemo() {
           recovery: '戴着皇冠的感觉真不错！看来你也认可我的实力了，哈哈哈！😄',
           mood: 'happy'
         }
+      },
+      // 和平精英彩蛋
+      airdrop: {
+        weak: { message: '📦 哎呀~是空投呀！', mood: 'neutral' },
+        medium: { message: '📦 咿呀！空投来啦！快去捡~(｡･ω･｡)', mood: 'happy' },
+        strong: { 
+          message: '📦 哇哇哇！！！超级空投耶！！！人家最喜欢空投啦~里面有好多好东西呢！(ﾉ>ω<)ﾉ✨',
+          recovery: '嘿嘿~捡到三级头和AWM啦！小可爱你真是人家的幸运星呢~(｡･ω･｡)ﾉ♡',
+          mood: 'happy'
+        }
+      },
+      grenade: {
+        weak: { message: '💣 呀！手雷~', mood: 'neutral' },
+        medium: { message: '💣 哎呀呀！要爆炸啦！(>_<)', mood: 'angry' },
+        strong: { 
+          message: '💣 轰隆隆！！！吓死人家了啦！！！呜呜呜~大叔的小心脏都快跳出来了！(ﾉдヽ)',
+          recovery: '呼呼~还好大叔反应快躲掉了...下次别吓人家好不好嘛~(｡•́︿•̀｡)',
+          mood: 'sad'
+        }
+      },
+      medkit: {
+        weak: { message: '🩹 医疗包~', mood: 'neutral' },
+        medium: { message: '🩹 哎呀~正好需要补血呢！', mood: 'happy' },
+        strong: { 
+          message: '🩹 医疗包来啦！！！救命恩人耶~(｡♥‿♥｡) 人家的血量刚好见底呢，小可爱真贴心！',
+          recovery: '满血复活啦！✨ 现在大叔又是一条好汉了！谢谢你哦~mua~(づ￣3￣)づ',
+          mood: 'happy'
+        }
+      },
+      helmet: {
+        weak: { message: '🪖 头盔~', mood: 'neutral' },
+        medium: { message: '🪖 三级头！防护升级啦~', mood: 'happy' },
+        strong: { 
+          message: '🪖 哇噻！三级头耶！！！大叔戴上是不是超帅的！(๑•̀ㅂ•́)و✧ 现在就算被爆头也不怕啦！',
+          recovery: '嘿嘿~戴着头盔的大叔是不是很有安全感呀~人家可是很勇敢的哦！(｡･ω･｡)ﾉ♡',
+          mood: 'proud'
+        }
+      },
+      chicken: {
+        weak: { message: '🍗 鸡腿！', mood: 'neutral' },
+        medium: { message: '🍗 好想吃鸡鸡哦~(๑´ڡ`๑)', mood: 'happy' },
+        strong: { 
+          message: '🍗 大吉大利，今晚吃鸡！！！(ﾉ≧∀≦)ﾉ✨ 哎呀呀~人家终于吃到鸡鸡了！这可是大叔最爱的时刻呢！',
+          recovery: '嘿嘿~和小可爱一起吃鸡的感觉真幸福呀~下次咱们再组队好不好？(｡♥‿♥｡)',
+          mood: 'happy'
+        }
+      },
+      trophy: {
+        weak: { message: '🏆 奖杯~', mood: 'neutral' },
+        medium: { message: '🏆 哇！冠军奖杯耶！', mood: 'happy' },
+        strong: { 
+          message: '🏆 冠军奖杯！！！(ﾉ°∀°)ﾉ⌒･*:.｡. .｡.:*･゜ﾟ･*✨ 人家是冠军啦！小可爱你看大叔厉害吧~',
+          recovery: '嘻嘻~这个奖杯要好好珍藏起来呢！谢谢你一直陪着大叔战斗哦~爱你哟！(づ｡◕‿‿◕｡)づ',
+          mood: 'happy'
+        }
       }
     };
     
-    const effect = eggEffects[eggType]?.[intensity] || eggEffects.whip.weak;
+    const effect = eggEffects[eggType]?.[intensity] || eggEffects.whip?.weak || { message: '🤔', mood: 'neutral' };
     
     // 根据强度设置不同的动画时长
     const isStrongEffect = intensity === 'strong';
@@ -717,25 +781,48 @@ export default function GameSoulDemo() {
                       };
                       
                       return {
+                        // 王者荣耀彩蛋动画
                         // 战锤：震动效果
                         scale: eggType === 'whip' ? 
                                (intensity === 'weak' ? [1, 1.05, 1] :
                                 intensity === 'medium' ? [1, 1.1, 0.95, 1.05, 1] :
                                 [1, 1.2, 0.9, 1.1, 0]) :
+                               // 和平精英彩蛋动画
+                               eggType === 'grenade' ?
+                               (intensity === 'weak' ? [1, 1.08, 1] :
+                                intensity === 'medium' ? [1, 1.15, 0.95, 1.1, 1] :
+                                [1, 1.3, 0.85, 1.2, 0.9, 1.1, 0]) :
+                               eggType === 'medkit' ?
+                               (intensity === 'weak' ? [1, 1.05, 1.05, 1] :
+                                intensity === 'medium' ? [1, 1.1, 1.1, 1] :
+                                [1, 1.2, 1.15, 1.1, 1]) :
                                characterMood === 'angry' ? [1, 1.1, 1] : 1,
                         
                         // 圣剑：战斗动作
                         x: eggType === 'sword' ? 
                            (intensity === 'weak' ? [-5, 5, 0] :
                             intensity === 'medium' ? [-10, 10, -5, 5, 0] :
-                            [-20, 20, -15, 15, -10, 10, 0]) : 0,
+                            [-20, 20, -15, 15, -10, 10, 0]) :
+                           eggType === 'airdrop' ?
+                           (intensity === 'weak' ? [-3, 3, 0] :
+                            intensity === 'medium' ? [-8, 8, 0] :
+                            [-15, 15, -10, 10, 0]) : 0,
+                        
                         y: eggType === 'sword' ? 
                            (intensity === 'weak' ? [-5, 0] :
                             intensity === 'medium' ? [-15, -10, 0] :
                             [-30, -40, -30, -20, 0]) :
+                           eggType === 'airdrop' ?
+                           (intensity === 'weak' ? [0, -5, 0] :
+                            intensity === 'medium' ? [-20, -15, 0] :
+                            [-50, -40, -20, 0]) :
+                           eggType === 'chicken' ?
+                           (intensity === 'weak' ? [0, -5, 0] :
+                            intensity === 'medium' ? [0, -10, -5, 0] :
+                            [0, -20, -15, -10, 0]) :
                            characterMood === 'happy' ? [0, -10, 0] : 0,
                         
-                        // 盾牌/药水/宝石/皇冠的旋转
+                        // 旋转动画
                         rotate: eggType === 'shield' ? 0 :
                                 eggType === 'potion' ? 
                                 (intensity === 'weak' ? [0, -3, 3, 0] :
@@ -746,13 +833,22 @@ export default function GameSoulDemo() {
                                  intensity === 'medium' ? [0, 180] :
                                  [0, 360]) :
                                 eggType === 'crown' ? 0 :
+                                eggType === 'helmet' ?
+                                (intensity === 'weak' ? [0, -5, 5, 0] :
+                                 intensity === 'medium' ? [0, -10, 10, 0] :
+                                 [0, -15, 15, -10, 10, 0]) :
+                                eggType === 'trophy' ? 0 :
                                 characterMood === 'sarcastic' ? [0, -5, 5, 0] : 0,
                         
-                        // 盾牌：闪烁防御
+                        // 透明度动画
                         opacity: eggType === 'shield' ? 
                                  (intensity === 'weak' ? [1, 0.7, 1] :
                                   intensity === 'medium' ? [1, 0.5, 1] :
-                                  [1, 0.3, 1]) : 1
+                                  [1, 0.3, 1]) :
+                                 eggType === 'grenade' ?
+                                 (intensity === 'weak' ? [1, 0.9, 1] :
+                                  intensity === 'medium' ? [1, 0.8, 1] :
+                                  [1, 0.6, 1, 0.6, 1]) : 1
                       };
                     })()}
                     transition={(() => {
@@ -948,6 +1044,218 @@ export default function GameSoulDemo() {
                         ))}
                       </>
                     )}
+                    
+                    {/* 和平精英彩蛋特效 */}
+                    {/* 空投：箱子下落 */}
+                    {activeEasterEgg?.startsWith('airdrop') && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0, y: -200 }}
+                          animate={{ 
+                            scale: [0, 1.2, 1],
+                            opacity: [0, 1, 1],
+                            y: [-200, 0, -10, 0],
+                            rotate: [0, 10, -10, 0]
+                          }}
+                          transition={{ duration: 1.2, ease: [0.34, 1.56, 0.64, 1] }}
+                          className="absolute text-8xl"
+                        >
+                          📦
+                        </motion.div>
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0, opacity: 0, y: -150 }}
+                            animate={{ 
+                              scale: [0, 1.5, 0],
+                              opacity: [0, 0.8, 0],
+                              y: [-150, 50, 100]
+                            }}
+                            transition={{ duration: 1, delay: i * 0.1 }}
+                            className="absolute text-3xl"
+                          >
+                            ☁️
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 手雷：爆炸效果 */}
+                    {activeEasterEgg?.startsWith('grenade') && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 1, opacity: 1 }}
+                          animate={{ 
+                            scale: [1, 3, 0],
+                            opacity: [1, 0.8, 0]
+                          }}
+                          transition={{ duration: 0.6 }}
+                          className="absolute text-8xl"
+                        >
+                          💥
+                        </motion.div>
+                        {[...Array(8)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 1, x: 0, y: 0, opacity: 1 }}
+                            animate={{ 
+                              scale: [1, 0.5, 0],
+                              x: [0, Math.cos(i * 45 * Math.PI / 180) * 120],
+                              y: [0, Math.sin(i * 45 * Math.PI / 180) * 120],
+                              opacity: [1, 0.6, 0],
+                              rotate: [0, 360]
+                            }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                            className="absolute text-4xl"
+                          >
+                            🔥
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 医疗包：治疗光环 */}
+                    {activeEasterEgg?.startsWith('medkit') && (
+                      <>
+                        {[...Array(3)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0.5, opacity: 1 }}
+                            animate={{ 
+                              scale: [0.5, 2.5, 3],
+                              opacity: [0.8, 0.4, 0]
+                            }}
+                            transition={{ 
+                              duration: 1.5, 
+                              delay: i * 0.3,
+                              ease: 'easeOut'
+                            }}
+                            className="absolute w-40 h-40 border-4 border-green-400 rounded-full"
+                          />
+                        ))}
+                        {[...Array(10)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ y: 80, x: (i - 5) * 20, opacity: 0, scale: 0.5 }}
+                            animate={{ 
+                              y: [-80, -150],
+                              opacity: [0, 1, 0],
+                              scale: [0.5, 1.2, 0.8]
+                            }}
+                            transition={{ 
+                              duration: 1.5, 
+                              delay: i * 0.08,
+                              repeat: 1
+                            }}
+                            className="absolute text-3xl"
+                          >
+                            💚
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 头盔：防护光效 */}
+                    {activeEasterEgg?.startsWith('helmet') && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0, y: -80 }}
+                          animate={{ 
+                            scale: [0, 1.3, 1],
+                            opacity: [0, 1, 1],
+                            y: [-80, -120, -100]
+                          }}
+                          transition={{ duration: 1 }}
+                          className="absolute text-7xl"
+                        >
+                          🪖
+                        </motion.div>
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 1, opacity: 0 }}
+                            animate={{ 
+                              scale: [1, 2, 0],
+                              opacity: [0, 0.8, 0],
+                              rotate: [i * 60, i * 60 + 360]
+                            }}
+                            transition={{ duration: 1.2, delay: i * 0.1 }}
+                            className="absolute text-4xl"
+                          >
+                            ⭐
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 吃鸡：庆祝特效 */}
+                    {activeEasterEgg?.startsWith('chicken') && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ 
+                            scale: [0, 1.5, 1.3],
+                            opacity: [0, 1, 1],
+                            rotate: [0, 360]
+                          }}
+                          transition={{ duration: 1, ease: 'easeOut' }}
+                          className="absolute text-9xl"
+                        >
+                          🍗
+                        </motion.div>
+                        {[...Array(12)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                            animate={{ 
+                              scale: [0, 1.5, 1],
+                              x: [0, Math.cos(i * 30 * Math.PI / 180) * 100],
+                              y: [0, Math.sin(i * 30 * Math.PI / 180) * 100, Math.sin(i * 30 * Math.PI / 180) * 120],
+                              opacity: [0, 1, 0.8, 0],
+                              rotate: [0, 720]
+                            }}
+                            transition={{ duration: 2, delay: i * 0.05, ease: 'easeOut' }}
+                            className="absolute text-4xl"
+                          >
+                            {i % 3 === 0 ? '🎉' : i % 3 === 1 ? '🎊' : '✨'}
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* 奖杯：胜利光芒 */}
+                    {activeEasterEgg?.startsWith('trophy') && (
+                      <>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0, y: -100 }}
+                          animate={{ 
+                            scale: [0, 1.4, 1.2],
+                            opacity: [0, 1, 1],
+                            y: [-100, -180, -160]
+                          }}
+                          transition={{ duration: 1.2 }}
+                          className="absolute text-9xl"
+                        >
+                          🏆
+                        </motion.div>
+                        {[...Array(16)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0, opacity: 1 }}
+                            animate={{ 
+                              scale: [0, 2.5, 0],
+                              opacity: [1, 0.7, 0],
+                              x: [0, Math.cos(i * 22.5 * Math.PI / 180) * 160],
+                              y: [0, Math.sin(i * 22.5 * Math.PI / 180) * 160]
+                            }}
+                            transition={{ duration: 1.5, delay: i * 0.04 }}
+                            className="absolute text-4xl"
+                          >
+                            {i % 2 === 0 ? '🌟' : '✨'}
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
                   </AnimatePresence>
 
                   {/* 原有的爆炸效果（通用） */}
@@ -1126,6 +1434,88 @@ export default function GameSoulDemo() {
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                          >
+                            {easterEggCounts[egg.type]}
+                          </motion.span>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* 和平精英彩蛋图标栏 */}
+                {selectedGame.id === 'pubg' && !isExploding && (
+                  <div className="flex justify-center gap-3 pb-2 border-b border-slate-700/50">
+                    {[
+                      { 
+                        type: 'airdrop', 
+                        icon: '📦', 
+                        label: '空投',
+                        animation: {
+                          whileHover: { scale: 1.15, y: [-3, 3, -3], transition: { duration: 0.6, repeat: Infinity } },
+                          whileTap: { scale: 0.9, y: 10 }
+                        }
+                      },
+                      { 
+                        type: 'grenade', 
+                        icon: '💣', 
+                        label: '手雷',
+                        animation: {
+                          whileHover: { scale: [1, 1.2, 1.1], rotate: [0, -10, 10, 0], transition: { duration: 0.5, repeat: Infinity } },
+                          whileTap: { scale: 0.8, rotate: 180 }
+                        }
+                      },
+                      { 
+                        type: 'medkit', 
+                        icon: '🩹', 
+                        label: '医疗包',
+                        animation: {
+                          whileHover: { scale: 1.2, rotate: [0, 5, -5, 0], transition: { duration: 0.4, repeat: Infinity } },
+                          whileTap: { scale: 0.85 }
+                        }
+                      },
+                      { 
+                        type: 'helmet', 
+                        icon: '🪖', 
+                        label: '头盔',
+                        animation: {
+                          whileHover: { scale: 1.15, y: [-2, -5, -2], transition: { duration: 0.5, repeat: Infinity } },
+                          whileTap: { scale: 0.9 }
+                        }
+                      },
+                      { 
+                        type: 'chicken', 
+                        icon: '🍗', 
+                        label: '吃鸡',
+                        animation: {
+                          whileHover: { scale: 1.2, rotate: [0, -15, 15, 0], transition: { duration: 0.6, repeat: Infinity } },
+                          whileTap: { scale: 0.85, rotate: 360 }
+                        }
+                      },
+                      { 
+                        type: 'trophy', 
+                        icon: '🏆', 
+                        label: '奖杯',
+                        animation: {
+                          whileHover: { scale: 1.2, y: [-5, -10, -5], transition: { duration: 0.6, repeat: Infinity } },
+                          whileTap: { scale: 0.9, y: 5 }
+                        }
+                      }
+                    ].map(egg => (
+                      <motion.button
+                        key={egg.type}
+                        onClick={() => handleEasterEggClick(egg.type)}
+                        whileHover={egg.animation.whileHover}
+                        whileTap={egg.animation.whileTap}
+                        className="relative w-12 h-12 rounded-lg bg-slate-700/50 hover:bg-slate-600/70 flex items-center justify-center text-2xl transition-all border border-slate-600/30 hover:border-pink-400/50"
+                        title={egg.label}
+                      >
+                        <span>{egg.icon}</span>
+                        {easterEggCounts[egg.type] > 0 && (
+                          <motion.span 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
                           >
                             {easterEggCounts[egg.type]}
                           </motion.span>
