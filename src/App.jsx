@@ -23,7 +23,7 @@ const COMPANIES = [
           role: '上路战士 / 毒舌王者',
           avatarColor: 'bg-blue-500',
           avatar: '⚔️',
-          avatarImage: '/arthur.png', // 亚瑟使用arthur.png图片
+          avatarImage: null, // 亚瑟不使用图片，用⚔️emoji
           greeting: '又是你？上次被我吐槽还敢来？行吧，说说你今天在峡谷又闹出什么笑话了。',
           personality: '性格傲慢毒舌，喜欢吐槽玩家，但偶尔会给出中肯的建议。说话直接不留情面，用词犀利讽刺，但内心其实关心玩家的游戏体验。',
           style: 'sarcastic'
@@ -505,19 +505,11 @@ export default function GameSoulDemo() {
                 <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-slate-900/60 to-slate-900"></div>
                 
                 {/* 角色剪影背景 */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                <div className="absolute inset-0 flex items-center justify-center opacity-20">
                   <div className="relative w-full h-full">
-                    {/* 亚瑟图片 - 左侧 */}
-                    <div className="absolute left-0 bottom-0 w-48 h-full flex items-end justify-center">
-                      <img 
-                        src="/arthur.png" 
-                        alt="亚瑟" 
-                        className="h-full object-contain object-bottom filter drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                        style={{ 
-                          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)',
-                          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)'
-                        }}
-                      />
+                    {/* 亚瑟剪影 - 左侧 */}
+                    <div className="absolute left-0 bottom-0 w-40 h-48 bg-gradient-to-t from-blue-600/40 to-transparent transform -skew-x-6">
+                      <Sword className="absolute top-8 left-1/2 -translate-x-1/2 w-16 h-16 text-blue-400/60" />
                     </div>
                     {/* 光子鸡剪影 - 右侧 */}
                     <div className="absolute right-0 bottom-0 w-40 h-48 bg-gradient-to-t from-pink-600/40 to-transparent transform skew-x-6">
